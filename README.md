@@ -1,7 +1,8 @@
-# ponpo
-sun repository
+text doc to accompany matlab TGA simulation by Diba Behnoudfar and 
+Michelle Gee 7/13/23
 
-howdy you're pretty cool friendo :)
+this file iteratively solves the continuity equation wrt destruction rate of
+the reactants (omega dot triple prime) in the species.
 
-
-I am your friend makin edits for funsies
+to run this file, a file containing stored variables 
+('ranzi_pyro_kinetics_gentile2017.mat') is needed.
