@@ -1,6 +1,8 @@
 % TGA simulation
 %% initialize 
 
+%were having fun
+
 clearvars –global
 clearvars
 
