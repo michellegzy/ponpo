@@ -14,7 +14,7 @@ gsp = length(g_index);
 nsp = 47;
 s_index = [1 2 15 17 18 19 23 24 25 26 27 28 32 36 37 38 39 40 41 42 43 44 45 46];
 
-Mesh.Jnodes = 3; % # nodes
+Mesh.Jnodes = 1; % # nodes
 sample_height = 1e-2;  % [m]
 Mesh.z = linspace(0,sample_height,Mesh.Jnodes);
 Mesh.dz = sample_height/(Mesh.Jnodes);
@@ -85,11 +85,11 @@ xlabel('time [s]');
 ylabel('mass loss rate (mlr) [kg/m^3]');
 title('Mass lost wrt t TGA2 for softwood (mlr)');
 
-figure(2); clf
-plot(T, mlr);
-xlabel('Temperature [K]');
-ylabel('mass loss rate (mlr) [kg/m^3]');
-title('Mass lost wrt T TGA2 for softwood (mlr)');
+% figure(2); clf
+% plot(T, mlr);
+% xlabel('Temperature [K]');
+% ylabel('mass loss rate (mlr) [kg/m^3]');
+% title('Mass lost wrt T TGA2 for softwood (mlr)');
 
 % figure(3); clf
 % plot(T, masslossrate);
@@ -111,6 +111,11 @@ title('t vs. yy TGA2 mean softwood');
 hold off;
 
 %% define functions
+
+function [] = mass_lost()
+    
+
+
 function [dydt] = yprime(t,yy,Mesh,T)
 
 global ycoeff afac nfac ea istart s_index g_index MW nsp masslossrate yje
