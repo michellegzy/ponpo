@@ -16,7 +16,7 @@ MW = MW*1e-3; % molecular weight (kg/mol)
 
 % setup mesh 
 Mesh.Jnodes = 3; % mesh size
-sample_height = 4e-2;
+sample_height = 1e-2;
 Mesh.dz = sample_height/(Mesh.Jnodes);
 Mesh.a = 1e-2^2; % surface area
 Mesh.dv = Mesh.a * Mesh.dz;
@@ -68,8 +68,7 @@ y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
 Kd = 1e-10; % porous fuel permeability
 
-
-%ode solver options
+% ode solver options
 
 dt =.1;
 nstep = 200;
@@ -86,7 +85,6 @@ j0 = zeros(length(t),1);
 Ts = zeros(length(t),1); Ts(1) = 300;
 
 options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'BDF',0, 'MaxOrder',1);
-
 
 % time integration 
 for i=1:nstep
