@@ -48,7 +48,9 @@ Mesh.dz = sample_height/(Mesh.Jnodes);
 Mesh.a = 1e-2^2;
 Mesh.dv = Mesh.a * Mesh.dz;
 
-yprime0 = zeros(Mesh.Jnodes*nsp+2*Mesh.Jnodes,1);
+% yprime0 = zeros(Mesh.Jnodes*nsp+2*Mesh.Jnodes ,1);
+nsp_len = length(nsp);
+yprime0 = zeros(nsp_len, 1); % ,1);
 rhos0 = zeros(Mesh.Jnodes,1);
 rhos_mass0 = zeros(Mesh.Jnodes,1);
 
@@ -142,19 +144,19 @@ hold off;
 %% define functions
 function [dydt] = yprime(t,yy,Mesh,T)
 
-global ycoeff afac nfac ea istart s_index g_index MW nsp masslossrate yje
+global ycoeff afac nfac ea istart s_index g_index MW nsp nsp_len masslossrate yje
 
-    wdot_mass = zeros(nsp,Mesh.Jnodes);
+    wdot_mass = zeros(nsp_len,Mesh.Jnodes);
     k = zeros(28,Mesh.Jnodes);
-    m = zeros(nsp,Mesh.Jnodes);
+    m = zeros(nsp_len,Mesh.Jnodes);
     rho_s_mass = zeros(Mesh.Jnodes,1);
     drhosdt = zeros(Mesh.Jnodes,1);
-    mprime = zeros(nsp,Mesh.Jnodes);
+    mprime = zeros(nsp_len,Mesh.Jnodes);
     
     yje = zeros(length(g_index),1);
     
     for i=1:Mesh.Jnodes
-        temp=yy(nsp*(i-1)+1:nsp*(i-1)+nsp);
+        temp=yy(nsp_len*(i-1)+1:nsp_len*(i-1)+nsp_len);
         temp(temp<0)=1e-30;
         m(:,i)=temp;
         m(:,i)= m(:,i)./MW;
