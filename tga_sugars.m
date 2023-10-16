@@ -108,38 +108,38 @@ for i=1:nstep
     t(i+1) = t(i) + dt;    
 end
 
-%% plot
-figure(1); clf
-hold on;
-plot(t, mlr);
-xlabel('time [s]');
-ylabel('mass loss rate (mlr) [kg/m^3]');
-title('Mass lost wrt t TGA2 for softwood (mlr)');
-
-figure(2); clf
-plot(T, mlr);
-xlabel('Temperature [K]');
-ylabel('mass loss rate (mlr) [kg/m^3]');
-title('Mass lost wrt T TGA2 for softwood (mlr)');
-
-figure(3); clf
-plot(T, masslossrate);
-xlabel('temperature [K]');
-ylabel('mass loss rate (masslossrate) [kg/m^3]');
-title('Mass lost wrt T TGA2 for softwood (masslossrate)');
-
-figure(4); clf
-plot(t, masslossrate);
-xlabel('time [s]');
-ylabel('mass loss rate (masslossrate) [kg/m^3]');
-title('Mass lost wrt t TGA2 for softwood (masslossrate)');
-
-figure(5); clf
-plot(t, yy);
-xlabel('time [s]');
-ylabel('yy');
-title('t vs. yy TGA2 mean_softwood');
-hold off;
+%% plot, but not rn
+% figure(1); clf
+% hold on;
+% plot(t, mlr);
+% xlabel('time [s]');
+% ylabel('mass loss rate (mlr) [kg/m^3]');
+% title('Mass lost wrt t TGA2 for softwood (mlr)');
+% 
+% figure(2); clf
+% plot(T, mlr);
+% xlabel('Temperature [K]');
+% ylabel('mass loss rate (mlr) [kg/m^3]');
+% title('Mass lost wrt T TGA2 for softwood (mlr)');
+% 
+% figure(3); clf
+% plot(T, masslossrate);
+% xlabel('temperature [K]');
+% ylabel('mass loss rate (masslossrate) [kg/m^3]');
+% title('Mass lost wrt T TGA2 for softwood (masslossrate)');
+% 
+% figure(4); clf
+% plot(t, masslossrate);
+% xlabel('time [s]');
+% ylabel('mass loss rate (masslossrate) [kg/m^3]');
+% title('Mass lost wrt t TGA2 for softwood (masslossrate)');
+% 
+% figure(5); clf
+% plot(t, yy);
+% xlabel('time [s]');
+% ylabel('yy');
+% title('t vs. yy TGA2 mean_softwood');
+% hold off;
 
 %% define functions
 function [dydt] = yprime(t,yy,Mesh,T)
@@ -159,6 +159,7 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp nsp_len masslossrate yj
         temp=yy(nsp_len*(i-1)+1:nsp_len*(i-1)+nsp_len);
         temp(temp<0)=1e-30;
         m(:,i)=temp;
+        %m(:,i)= transpose(m)./MW;
         m(:,i)= m(:,i)./MW;
     end
     
