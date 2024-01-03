@@ -1,6 +1,7 @@
 % tga sim for sugars only
+% BY MG
 
-%% initialize 
+%% initialize (-rhos, -nsp -> nsp_len)
 global ycoeff afac nfac ea istart g_index s_index MW rhos0 gsp nsp masslossrate 
 
 % load ('ranzi_pyro_kinetics_gentile2017.mat');
@@ -8,7 +9,7 @@ global ycoeff afac nfac ea istart g_index s_index MW rhos0 gsp nsp masslossrate
 % ycoeff(47,:)=0;
 % g_index = [3 4 5 6 7 8 9 10 11 12 13 14 16 20 21 22 29 30 31 33 34 35 47];
 % s_index = [1 2 15 17 18 19 23 24 25 26 27 28 32 36 37 38 39 40 41 42 43 44 45 46];
-species=['sugar','sugar1','sugar2','taro1','taro2','h2o','taro3','char','gco2','gch4','gc2h4','gco','gcoh2'];
+species = {'sugar','sugar1','sugar2','taro1','taro2','h2o','taro3','char','gco2','gch4','gc2h4','gco','gcoh2'};
 
 ycoeff=[-1	0	0
         0.47 -1	0
@@ -33,7 +34,7 @@ nsp = [g_index, s_index];
 istart=[1 2 3];
 
 % add molecular weights
-MW =[176; 176; 176; 176; 114; 18; 290; 12; 44; 16; 28; 28; 30];
+MW =[176; 176; 176; 176; 114; 18; 290; 12; 44; 16; 28; 28; 30]; %*1e-3;
 
 afac = [.8e10 .15e5 .2e2];
 nfac = [0 0 0];
@@ -41,7 +42,7 @@ nfac = [0 0 0];
 % activation energy, convert to J/mol
 ea = [26000 16000 20000];
 
-Mesh.Jnodes = 3;
+Mesh.Jnodes = 3; %needs to be _ (1? 3?) for TGA
 sample_height = 1e-2;  % m?
 Mesh.z = linspace(0,sample_height,Mesh.Jnodes);
 Mesh.dz = sample_height/(Mesh.Jnodes);
@@ -52,7 +53,7 @@ Mesh.dv = Mesh.a * Mesh.dz;
 nsp_len = length(nsp);
 yprime0 = zeros(nsp_len, 1); % ,1);
 rhos0 = zeros(Mesh.Jnodes,1);
-rhos_mass0 = zeros(Mesh.Jnodes,1);
+%rhos_mass0 = zeros(Mesh.Jnodes,1);
 
 % set initial composition
 m0 = zeros(13,Mesh.Jnodes);
@@ -73,14 +74,14 @@ mass0 = m0.*MW; %kg
 rhos_mass0 = rhos_mass0+100;
 
 sample_mass = Mesh.a*sample_height*rhos_mass0(1);
-mass0 = mass0./100*sample_mass./Mesh.Jnodes;
+mass0 = mass0./100*sample_mass./Mesh.Jnodes; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 y0 = [mass0(:); rhos_mass0(:)];
 
 % specify initial conditions
 T0 = 300; % initial temperature
 Tend = 450+273; % final temperature
-dt =.01;
+dt = 1;
 beta = 3.5/60; %rate of temperature change (K/s)
 nstep = fix((Tend-T0)/beta)*100;
 time = 0;
@@ -92,7 +93,7 @@ ye = zeros(length(t),length(g_index));
 j0 = zeros(length(t),1);
 mlr = zeros(length(t),1);
 T = zeros(length(t),1); T(1) = 300;
-Mg = MW(g_index)*1e-3;
+Mg = MW(g_index)*1e-3; %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 options = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'NonNegative', 1, 'BDF',0, 'MaxOrder',2);
 
@@ -108,38 +109,38 @@ for i=1:nstep
     t(i+1) = t(i) + dt;    
 end
 
-%% plot, but not rn
-% figure(1); clf
-% hold on;
-% plot(t, mlr);
-% xlabel('time [s]');
-% ylabel('mass loss rate (mlr) [kg/m^3]');
-% title('Mass lost wrt t TGA2 for softwood (mlr)');
-% 
-% figure(2); clf
-% plot(T, mlr);
-% xlabel('Temperature [K]');
-% ylabel('mass loss rate (mlr) [kg/m^3]');
-% title('Mass lost wrt T TGA2 for softwood (mlr)');
-% 
-% figure(3); clf
-% plot(T, masslossrate);
-% xlabel('temperature [K]');
-% ylabel('mass loss rate (masslossrate) [kg/m^3]');
-% title('Mass lost wrt T TGA2 for softwood (masslossrate)');
-% 
-% figure(4); clf
-% plot(t, masslossrate);
-% xlabel('time [s]');
-% ylabel('mass loss rate (masslossrate) [kg/m^3]');
-% title('Mass lost wrt t TGA2 for softwood (masslossrate)');
-% 
-% figure(5); clf
-% plot(t, yy);
-% xlabel('time [s]');
-% ylabel('yy');
-% title('t vs. yy TGA2 mean_softwood');
-% hold off;
+%% plot 
+figure(1); clf
+hold on;
+plot(t, mlr);
+xlabel('time [s]');
+ylabel('mass loss rate (mlr) [kg/m^3]');
+title('Mass lost wrt t TGA2 (mlr)');
+
+figure(2); clf
+plot(T, mlr);
+xlabel('Temperature [K]');
+ylabel('mass loss rate (mlr) [kg/m^3]');
+title('Mass lost wrt T TGA2 (mlr)');
+
+figure(3); clf
+plot(T, masslossrate);
+xlabel('temperature [K]');
+ylabel('mass loss rate (masslossrate) [kg/m^3]');
+title('Mass lost wrt T TGA2 (masslossrate)');
+
+figure(4); clf
+plot(t, masslossrate);
+xlabel('time [s]');
+ylabel('mass loss rate (masslossrate) [kg/m^3]');
+title('Mass lost wrt t TGA2 (masslossrate)');
+
+figure(5); clf
+plot(t, yy);
+xlabel('time [s]');
+ylabel('yy');
+title('t vs. yy TGA2');
+hold off;
 
 %% define functions
 function [dydt] = yprime(t,yy,Mesh,T)

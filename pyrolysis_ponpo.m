@@ -64,7 +64,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 40000; % input heat flux
+qs = 40000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
