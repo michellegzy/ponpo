@@ -27,8 +27,8 @@ ycoeff=[-1	0	0
         0	0	0.73];
 
 % check if TARO species end up in gas phase
-g_index=[4 5 6 7]; % 4?5? try yes then no
-s_index=[1 2 3 8 9 10 11 12 13];
+g_index=[6 7]; % 4?5? 
+s_index=[1 2 3 4 5 8 9 10 11 12 13]; % iff: 4 5 do not end up in gas phase
 gsp = length(g_index);
 nsp = [g_index, s_index]; % all species
 
@@ -58,7 +58,8 @@ rhos_mass0 = zeros(Mesh.Jnodes,1);
 
 % set initial composition
 m0 = zeros(13,Mesh.Jnodes);
-m0(1) = 1;  % line added to specify sugar at start time
+m0(1) = 1;  % line added to specify only reactant at start time (first 
+% reaction - sugar) 
 
 % define # moles ea. species in question (sugar reactions)
 
@@ -85,7 +86,7 @@ T0 = 300; % initial temperature
 Tend = 700; % final temperature. is there a way to not pre-set this?
 dt = 1;
 beta = 10/60; %rate of temperature change (K/s)
-nstep = fix((Tend-T0)/beta)*100;
+nstep = fix((Tend-T0)/beta)*5; %*100;
 %nstep = ((Tend-T0)/beta);
 time = 0;
 t = zeros(nstep+1,1); 
@@ -124,7 +125,7 @@ hold on;
 plot(T, mlr);
 %semilogx(T, mlr)
 xlabel('Temperature [K]');
-ylabel('mass loss rate (mlr) [kg/m^3]');
+ylabel('DTG /%/min // mlr'); %[kg/m^3]
 title('Mass lost wrt T (mlr)');
 %axis([0 1000 -.09 0]);
 % %ylim()
