@@ -4,7 +4,7 @@
 %% initialize 
 
 clear all vars
-global ycoeff afac nfac ea istart g_index s_index MW gsp nsp_len masslossrate ;
+global ycoeff afac nfac ea istart g_index s_index MW gsp nsp_len masslossrate 
 species = {'sugar','sugar1','sugar2','taro1','taro2','h2o','taro3','char','gco2','gch4','gc2h4','gco','gcoh2'};
 
 ycoeff=[-1	0	0
