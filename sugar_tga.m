@@ -4,12 +4,6 @@
 %% initialize 
 clear all vars
 global ycoeff afac nfac ea istart g_index s_index MW gsp nsp_len masslossrate 
-
-% load ('ranzi_pyro_kinetics_gentile2017.mat');
-% MW(47)=28;
-% ycoeff(47,:)=0;
-% g_index = [3 4 5 6 7 8 9 10 11 12 13 14 16 20 21 22 29 30 31 33 34 35 47];
-% s_index = [1 2 15 17 18 19 23 24 25 26 27 28 32 36 37 38 39 40 41 42 43 44 45 46];
 species = {'sugar','sugar1','sugar2','taro1','taro2','h2o','taro3','char','gco2','gch4','gc2h4','gco','gcoh2'};
 
 ycoeff=[-1	0	0
@@ -37,7 +31,6 @@ istart=[1 2 3];
 % add molecular weights
 MW = [176; 176; 176; 176; 114; 18; 290; 12; 44; 16; 28; 28; 30];
 
-
 afac = [.8e10 .15e5 .2e2];
 nfac = [0 0 0];
 
@@ -53,26 +46,15 @@ Mesh.dv = Mesh.a * Mesh.dz;
 
 nsp_len = length(nsp); % total (gas and solid) species array length
 yprime0 = zeros(Mesh.Jnodes*nsp_len+2*Mesh.Jnodes ,1);
-%yprime0 = zeros(nsp_len, 1); % ,1);
 rhos_mass0 = zeros(Mesh.Jnodes,1);
 
 % set initial composition
 m0 = zeros(13,Mesh.Jnodes);
-m0(1) = 1;  % line added to specify sugar at start time
+m0(1) = 1;  % line added to specify only reactant at start time (first 
+% reaction - sugar)
 
 % define # moles ea. species in question (sugar reactions)
 
-% m0(1,:) = 19/MW(1); % CELL
-% m0(17,:) = 15/MW(17); % HCE
-% m0(24,:) = 0/MW(24); % LIGH
-% m0(25,:) = 23.5/MW(25); % LIGO
-% m0(23,:) = 0/MW(23); % LIGC
-% m0(38,:) = 22.3/MW(38); %TGL
-% m0(37,:) = 3.1/MW(37); %CTANN
-% m0(39,:) = 0.05/MW(39); %moisture
-
-%mass0 = m0.*MW; %kg %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%yi0 = mass0(s_index,1)./100;
 rhos_mass0 = rhos_mass0+100;
 
 sample_mass = Mesh.a*sample_height*rhos_mass0(1);
@@ -85,8 +67,7 @@ T0 = 300; % initial temperature
 Tend = 700; % final temperature. is there a way to not pre-set this?
 dt = 1;
 beta = 10/60; %rate of temperature change (K/s)
-nstep = fix((Tend-T0)/beta)*100;
-%nstep = ((Tend-T0)/beta);
+nstep = fix((Tend-T0)/beta)*5; %*100
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); 
@@ -112,48 +93,19 @@ for i=1:nstep
 end
 
 %% plot
-% figure(1); clf
-% hold on;
-% plot(t, mlr);
-% xlabel('time [s]');
-% ylabel('mass loss rate (mlr) [kg/m^3]');
-% title('Mass lost wrt t (mlr)');
+figure(1); clf
+hold on;
+plot(T, yy(:,end));
+xlabel('Temp [K]');
+ylabel('mass loss wrt T');
+title('Mass lost wrt t (mlr)');
 
 figure(2); clf
-hold on;
 plot(T, mlr);
-%semilogx(T, mlr)
 xlabel('Temperature [K]');
-ylabel('mass loss rate (mlr) [kg/m^3]');
-title('Mass lost wrt T (mlr)');
-%axis([0 1000 -.09 0]);
-% %ylim()
+ylabel('mlr, DTG');
+title('Mass loss rate (mlr, DTG) wrt T');
 hold off;
-
-% figure(3); clf
-% plot(T, masslossrate);
-% xlabel('temperature [K]');
-% ylabel('mass loss rate (masslossrate) [kg/m^3]');
-% title('Mass lost wrt T (masslossrate)');
-% 
-% figure(4); clf
-% plot(t, masslossrate);
-% xlabel('time [s]');
-% ylabel('mass loss rate (masslossrate) [kg/m^3]');
-% title('Mass lost wrt t (masslossrate)');
-
-% figure(5); clf
-% plot(t, yy);
-% xlabel('time [s]');
-% ylabel('yy');
-% title('t vs. yy');
-
-% figure(6); clf
-% plot(t, mlr);
-% xlabel('time [s]');
-% ylabel('mlr');
-% title('t vs. mlr');
-% hold off;
 
 %% define functions
 function [dydt] = yprime(t,yy,Mesh,T)
@@ -193,9 +145,7 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp_len masslossrate yje
         drhosdt(i) = - sum(wdot_mass(g_index,i));
     end
 
-    masslossrate = sum(drhosdt);
-    %disp(masslossrate); %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	   
+    masslossrate = sum(drhosdt);	   
     dydt = [mprime(:); drhosdt(:)];  
 end
 
@@ -214,7 +164,6 @@ end
 
 function rho_sm = rhos_mass(yi,phi)
 
-%kg/m3
     global MW s_index
     
     s_density = [9.3745;9.3745;25;9.87000000000000;11.5050;11.5050;...
