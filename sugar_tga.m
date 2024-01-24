@@ -2,6 +2,7 @@
 % by DIBA
 
 %% initialize 
+
 clear all vars
 global ycoeff afac nfac ea istart g_index s_index MW gsp nsp_len masslossrate 
 species = {'sugar','sugar1','sugar2','taro1','taro2','h2o','taro3','char','gco2','gch4','gc2h4','gco','gcoh2'};
@@ -21,8 +22,8 @@ ycoeff=[-1	0	0
         0	0	0.73];
 
 % check if TARO species end up in gas phase
-g_index=[4 5 6 7]; % 4?5? try yes then no
-s_index=[1 2 3 8 9 10 11 12 13];
+g_index=[6 7]; % 4?5? 
+s_index=[1 2 3 4 5 8 9 10 11 12 13]; % iff: 4 5 do not end up in gas phase
 gsp = length(g_index);
 nsp = [g_index, s_index]; % all species
 
@@ -34,10 +35,10 @@ MW = [176; 176; 176; 176; 114; 18; 290; 12; 44; 16; 28; 28; 30];
 afac = [.8e10 .15e5 .2e2];
 nfac = [0 0 0];
 
-% activation energy, convert to J/mol
+% convert activation energy to J/mol
 ea = [26000 16000 20000]*4.184;
 
-Mesh.Jnodes = 1; % should be 1 for tga
+Mesh.Jnodes = 1; % 1 for tga
 sample_height = 1e-2;  % m?
 Mesh.z = linspace(0,sample_height,Mesh.Jnodes);
 Mesh.dz = sample_height/(Mesh.Jnodes);
@@ -46,20 +47,19 @@ Mesh.dv = Mesh.a * Mesh.dz;
 
 nsp_len = length(nsp); % total (gas and solid) species array length
 yprime0 = zeros(Mesh.Jnodes*nsp_len+2*Mesh.Jnodes ,1);
+%yprime0 = zeros(nsp_len, 1); % ,1);
 rhos_mass0 = zeros(Mesh.Jnodes,1);
 
 % set initial composition
 m0 = zeros(13,Mesh.Jnodes);
 m0(1) = 1;  % line added to specify only reactant at start time (first 
-% reaction - sugar)
+% reaction - sugar) 
 
 % define # moles ea. species in question (sugar reactions)
 
 rhos_mass0 = rhos_mass0+100;
-
 sample_mass = Mesh.a*sample_height*rhos_mass0(1);
 m0 = m0./sum(m0(s_index,1))*sample_mass./Mesh.Jnodes; %%%%%%%%%%%%%%%%%%
-
 y0 = [m0(:); rhos_mass0(:)];
 
 % specify initial conditions
@@ -67,7 +67,7 @@ T0 = 300; % initial temperature
 Tend = 700; % final temperature. is there a way to not pre-set this?
 dt = 1;
 beta = 10/60; %rate of temperature change (K/s)
-nstep = fix((Tend-T0)/beta)*5; %*100
+nstep = fix((Tend-T0)/beta)*5; %*100;
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); 
@@ -93,19 +93,48 @@ for i=1:nstep
 end
 
 %% plot
-figure(1); clf
-hold on;
-plot(T, yy(:,end));
-xlabel('Temp [K]');
-ylabel('mass loss wrt T');
-title('Mass lost wrt t (mlr)');
+% figure(1); clf
+% hold on;
+% plot(t, mlr);
+% xlabel('time [s]');
+% ylabel('mass loss rate (mlr) [kg/m^3]');
+% title('Mass lost wrt t (mlr)');
 
 figure(2); clf
+hold on;
 plot(T, mlr);
+%semilogx(T, mlr)
 xlabel('Temperature [K]');
-ylabel('mlr, DTG');
-title('Mass loss rate (mlr, DTG) wrt T');
+ylabel('DTG /%/min // mlr'); %[kg/m^3]
+title('Mass lost wrt T (mlr)');
+%axis([0 1000 -.09 0]);
+% %ylim()
 hold off;
+
+% figure(3); clf
+% plot(T, masslossrate);
+% xlabel('temperature [K]');
+% ylabel('mass loss rate (masslossrate) [kg/m^3]');
+% title('Mass lost wrt T (masslossrate)');
+% 
+% figure(4); clf
+% plot(t, masslossrate);
+% xlabel('time [s]');
+% ylabel('mass loss rate (masslossrate) [kg/m^3]');
+% title('Mass lost wrt t (masslossrate)');
+
+% figure(5); clf
+% plot(t, yy);
+% xlabel('time [s]');
+% ylabel('yy');
+% title('t vs. yy');
+
+% figure(6); clf
+% plot(t, mlr);
+% xlabel('time [s]');
+% ylabel('mlr');
+% title('t vs. mlr');
+% hold off;
 
 %% define functions
 function [dydt] = yprime(t,yy,Mesh,T)
