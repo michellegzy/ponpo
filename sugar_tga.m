@@ -1,5 +1,5 @@
 % tga sim for sugars only
-% by DIBA
+% by Diba and Michelle
 
 %% initialize 
 
@@ -21,9 +21,8 @@ ycoeff=[-1	0	0
         0	0	0.62
         0	0	0.73];
 
-% check if TARO species end up in gas phase
-g_index=[6 7]; % 4?5? 
-s_index=[1 2 3 4 5 8 9 10 11 12 13]; % iff: 4 5 do not end up in gas phase
+g_index=[4 5 6 7 9 10 11 12 13]; % og: 4567
+s_index=[1 2 3 8]; % iff: 4 5 do not end up in gas phase. og:1 2 3 4 5 8 9 10 11 12 13
 gsp = length(g_index);
 nsp = [g_index, s_index]; % all species
 
@@ -64,10 +63,10 @@ y0 = [m0(:); rhos_mass0(:)];
 
 % specify initial conditions
 T0 = 300; % initial temperature
-Tend = 700; % final temperature. is there a way to not pre-set this?
+Tend = 1300; % final temperature. is there a way to not pre-set this?
 dt = 1;
-beta = 10/60; %rate of temperature change (K/s)
-nstep = fix((Tend-T0)/beta)*5; %*100;
+beta = 10/60; % rate of temperature change (K/s)
+nstep = fix((Tend-T0)/beta)*(1/dt);
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); 
@@ -93,47 +92,20 @@ for i=1:nstep
 end
 
 %% plot
-% figure(1); clf
-% hold on;
-% plot(t, mlr);
-% xlabel('time [s]');
-% ylabel('mass loss rate (mlr) [kg/m^3]');
-% title('Mass lost wrt t (mlr)');
-
-figure(2); clf
+figure(1); clf
 hold on;
-plot(T, mlr);
-%semilogx(T, mlr)
-xlabel('Temperature [K]');
-ylabel('DTG /%/min // mlr'); %[kg/m^3]
-title('Mass lost wrt T (mlr)');
-%axis([0 1000 -.09 0]);
-% %ylim()
-hold off;
+plot(T, yy(:,end));
+xlim([300 1250]);
+ylim([0 100]);
+xlabel('Temp [K]');
+ylabel('mass %');
+title('mass % evolution wrt T for 4 5 6 7 9 10 11 12 13 in gas phase');
 
-% figure(3); clf
-% plot(T, masslossrate);
-% xlabel('temperature [K]');
-% ylabel('mass loss rate (masslossrate) [kg/m^3]');
-% title('Mass lost wrt T (masslossrate)');
-% 
-% figure(4); clf
-% plot(t, masslossrate);
-% xlabel('time [s]');
-% ylabel('mass loss rate (masslossrate) [kg/m^3]');
-% title('Mass lost wrt t (masslossrate)');
-
-% figure(5); clf
-% plot(t, yy);
-% xlabel('time [s]');
-% ylabel('yy');
-% title('t vs. yy');
-
-% figure(6); clf
-% plot(t, mlr);
-% xlabel('time [s]');
-% ylabel('mlr');
-% title('t vs. mlr');
+% figure(2); clf
+% plot(T, mlr);
+% xlabel('Temperature [K]');
+% ylabel('mlr, DTG');
+% title('Mass loss rate (mlr, DTG) wrt T');
 % hold off;
 
 %% define functions
@@ -146,7 +118,7 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp_len masslossrate yje
     m = zeros(nsp_len,Mesh.Jnodes);
     drhosdt = zeros(Mesh.Jnodes,1);
     mprime = zeros(nsp_len,Mesh.Jnodes);
-    
+
     yje = zeros(length(g_index),1);
     
     for i=1:Mesh.Jnodes
@@ -158,12 +130,9 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp_len masslossrate yje
     end
     
     yi = zeros(length(s_index),Mesh.Jnodes);
-   
-    
     R = 8.314; 
     
     for i=1:Mesh.Jnodes
-    
         yi(:,i) = m(s_index,i).*MW(s_index)./sum(m(s_index,i).*MW(s_index));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
         mprime(:,i) = ycoeff*(k(:,i).*m(istart,i)).*MW; %dmdt
