@@ -47,7 +47,7 @@ Mesh.dv = Mesh.a * Mesh.dz;
 nsp_len = length(nsp); % total (gas and solid) species array length
 yprime0 = zeros(Mesh.Jnodes*nsp_len+2*Mesh.Jnodes ,1);
 %yprime0 = zeros(nsp_len, 1); % ,1);
-rhos_mass0 = zeros(Mesh.Jnodes,1);
+rhos_mass0 = zeros(Mesh.Jnodes,1); % add sugar starting mass? %%%%%%%%%%%%
 
 % set initial composition
 m0 = zeros(13,Mesh.Jnodes);
@@ -56,14 +56,15 @@ m0(1) = 1;  % line added to specify only reactant at start time (first
 
 % define # moles ea. species in question (sugar reactions)
 
-rhos_mass0 = rhos_mass0+100;
-sample_mass = Mesh.a*sample_height*rhos_mass0(1);
+rhos_mass0 = rhos_mass0+100; % 100% starting mass 
+sample_mass = Mesh.a*sample_height*rhos_mass0(1); % add sugar starting mass?
+
 m0 = m0./sum(m0(s_index,1))*sample_mass./Mesh.Jnodes; %%%%%%%%%%%%%%%%%%
 y0 = [m0(:); rhos_mass0(:)];
 
 % specify initial conditions
 T0 = 300; % initial temperature
-Tend = 1300; % final temperature. is there a way to not pre-set this?
+Tend = 1000; % final temperature. is there a way to not pre-set this?
 dt = 1;
 beta = 10/60; % rate of temperature change (K/s)
 nstep = fix((Tend-T0)/beta)*(1/dt);
@@ -95,11 +96,11 @@ end
 figure(1); clf
 hold on;
 plot(T, yy(:,end));
-xlim([300 1250]);
+xlim([300 1000]);
 ylim([0 100]);
 xlabel('Temp [K]');
 ylabel('mass %');
-title('mass % evolution wrt T for 4 5 6 7 9 10 11 12 13 in gas phase');
+title('mass % evolution wrt T');
 
 % figure(2); clf
 % plot(T, mlr);

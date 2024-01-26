@@ -34,7 +34,7 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 
 % set initial composition
 % define # moles at each node (column) for corresp. species (row)
-m0(1,:) = 0.4254/MW(1); % CELL. 
+m0(1,:) = 0.4254/MW(1); % CELL 
 m0(17,:) = 0.1927/MW(17); % HCE
 m0(24,:) = 0.0998/MW(24); % LIGH
 m0(25,:) = 0.0482/MW(25); % LIGO
