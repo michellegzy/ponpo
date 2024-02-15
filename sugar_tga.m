@@ -1,5 +1,5 @@
 % tga sim for sugars only
-% by Diba and Michelle
+% by Michelle based on tga2.m by DBehnoudfar
 
 %% initialize 
 
@@ -81,6 +81,7 @@ T = zeros(length(t),1); T(1) = 300;
 options = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'NonNegative', 1, 'BDF',0, 'MaxOrder',2);
 
 %% begin iterating through mesh
+
 for i=1:nstep
     tspan = [t(i) t(i)+dt];
     [t2,a] = ode113(@(t,y)yprime(time,y,Mesh,T(i)),tspan,yy(i,:),options);
@@ -93,6 +94,7 @@ for i=1:nstep
 end
 
 %% plot
+
 figure(1); clf
 hold on;
 plot(T, yy(:,end));
@@ -110,6 +112,7 @@ title('Mass loss rate (mlr, DTG) wrt T');
 hold off;
 
 %% define functions
+
 function [dydt] = yprime(t,yy,Mesh,T)
 
 global ycoeff afac nfac ea istart s_index g_index MW nsp_len masslossrate yje
