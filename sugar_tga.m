@@ -1,5 +1,5 @@
 % tga sim for sugars only
-% by Michelle based on tga2.m by DBehnoudfar
+% by Diba and Michelle
 
 %% initialize 
 
@@ -64,7 +64,7 @@ y0 = [m0(:); rhos_mass0(:)];
 
 % specify initial conditions
 T0 = 300; % initial temperature
-Tend = 1250; % final temperature. is there a way to not pre-set this?
+Tend = 1000; % final temperature. is there a way to not pre-set this?
 dt = 1;
 beta = 10/60; % rate of temperature change (K/s)
 nstep = fix((Tend-T0)/beta)*(1/dt);
@@ -81,7 +81,6 @@ T = zeros(length(t),1); T(1) = 300;
 options = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'NonNegative', 1, 'BDF',0, 'MaxOrder',2);
 
 %% begin iterating through mesh
-
 for i=1:nstep
     tspan = [t(i) t(i)+dt];
     [t2,a] = ode113(@(t,y)yprime(time,y,Mesh,T(i)),tspan,yy(i,:),options);
@@ -93,26 +92,27 @@ for i=1:nstep
     t(i+1) = t(i) + dt;    
 end
 
-%% plot
+% %% plot
+% figure(1); clf
+% hold on;
+% plot(T, yy(:,end));
+% xlim([300 1000]);
+% ylim([0 100]);
+% xlabel('Temp [K]');
+% ylabel('mass %');
+% title('mass % evolution wrt T');
 
-figure(1); clf
-hold on;
-plot(T, yy(:,end));
-xlim([300 1250]);
-ylim([0 100]);
-xlabel('Temp [K]');
-ylabel('mass %');
-title('mass % evolution wrt T');
-
-figure(2); clf
-plot(T, -mlr);
-xlabel('Temperature [K]');
-ylabel('mlr, DTG');
-title('Mass loss rate (mlr, DTG) wrt T');
-hold off;
+% figure(2); clf
+% hold on;
+% plot(T, mlr);
+% xlabel('Temperature [K]');
+% ylabel('mlr, DTG');
+% xlim([300 1000]);
+% ylim([0 100]);
+% title('Mass loss rate (mlr, DTG) wrt T');
+% hold off;
 
 %% define functions
-
 function [dydt] = yprime(t,yy,Mesh,T)
 
 global ycoeff afac nfac ea istart s_index g_index MW nsp_len masslossrate yje
