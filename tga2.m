@@ -26,7 +26,6 @@ yprime0 = zeros(Mesh.Jnodes*nsp+2*Mesh.Jnodes,1);
 rhos0 = zeros(Mesh.Jnodes,1);
 rhos_mass0 = zeros(Mesh.Jnodes,1);
 
-
 %% set initial composition
 
 m0 = zeros(47,Mesh.Jnodes);
@@ -45,19 +44,17 @@ m0(39,:) = 0.0/MW(39); %moisture
 mass0 = m0.*MW; %kg
 %yi0 = mass0(s_index,1)./100;
 rhos_mass0 = rhos_mass0+100;
-
 sample_mass = Mesh.a*sample_height*rhos_mass0(1);
 mass0 = mass0./100*sample_mass./Mesh.Jnodes;
-
 y0 = [mass0(:); rhos_mass0(:)];
 
 %% initial conditions
 
 T0 = 300; % initial temperature
-Tend = 450; % final temperature
-dt =1;
+Tend = 700; % final temperature
+dt = 1;
 beta = 10/60; %rate of temperature change (K/s)
-nstep = fix((Tend-T0)/beta)*100;
+nstep = fix((Tend-T0)/beta)*(1/dt);
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); 
@@ -70,6 +67,8 @@ T = zeros(length(t),1); T(1) = 300;
 Mg = MW(g_index)*1e-3;
 
 options = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'NonNegative', 1, 'BDF',0, 'MaxOrder',2);
+
+%% time integration 
 
 for i=1:nstep
     tspan = [t(i) t(i)+dt];
@@ -86,10 +85,19 @@ end
 
 figure(1); clf
 hold on;
-plot(T, mlr);
-xlabel('temperature [K]');
-ylabel('mass loss rate (mlr) [kg/m^3]');
-title('Mass lost wrt T (mlr)');
+plot(T, yy(:,end));
+% xlim([300 1250]);
+% ylim([0 100]);
+xlabel('Temp [K]');
+ylabel('mass %');
+title('mass % evolution wrt T');
+
+figure(2); clf
+plot(T, -mlr);
+xlabel('Temperature [K]');
+ylabel('mlr, DTG');
+title('Mass loss rate (mlr, DTG) wrt T');
+hold off;
 
 %% define functions 
 
@@ -103,8 +111,6 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp masslossrate yje
     rho_s_mass = zeros(Mesh.Jnodes,1);
     drhosdt = zeros(Mesh.Jnodes,1);
     mprime = zeros(nsp,Mesh.Jnodes);
-    
-    
     yje = zeros(length(g_index),1);
     
     for i=1:Mesh.Jnodes
@@ -115,13 +121,11 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp masslossrate yje
     end
     
     yi = zeros(length(s_index),Mesh.Jnodes);
-    
     rho_s_mass(:) = yy(nsp*Mesh.Jnodes+1:end);
     
     R = 8.314; 
     
     for i=1:Mesh.Jnodes
-    
         yi(:,i) = m(s_index,i).*MW(s_index)./sum(m(s_index,i).*MW(s_index));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
         mprime(:,i) = ycoeff*(k(:,i).*m(istart,i)).*MW; %dmdt
@@ -132,11 +136,9 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp masslossrate yje
         drhosdt(i) = - sum(wdot_mass(g_index,i));
     end
 
-    masslossrate = sum(drhosdt);
-	   
+    masslossrate = sum(drhosdt);  
     dydt = [mprime(:); drhosdt(:)];  
 end
-
 
 function phi = phii(yi,rho_s_mass)
     
@@ -151,9 +153,7 @@ function phi = phii(yi,rho_s_mass)
     phi = 1-sum(yi./(s_density.*MW(s_index)))*rho_s_mass;
 end
 
-
 function rho_sm = rhos_mass(yi,phi)
-
 %kg/m3
     global MW s_index
     
@@ -164,4 +164,4 @@ function rho_sm = rhos_mass(yi,phi)
         0.0101350128633761;0.00507436386823035;0.00579578562602859];
 
     rho_sm = (1-phi)/sum(yi./(s_density.*MW(s_index)));
-end
+end 
