@@ -1,4 +1,3 @@
-
 %% 1D pyrolysis solver by DBehnoudfar edited by Michelle Gee
 
 global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp tempflux p0 Kd yj0

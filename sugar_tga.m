@@ -1,6 +1,5 @@
 % tga sim for sugars only
-% by Michelle based on tga2.m by DBehnoudfar
-
+% by Michelle based on tga.m 
 %% initialize 
 
 clear all vars
