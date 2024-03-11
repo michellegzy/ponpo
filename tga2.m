@@ -5,6 +5,8 @@
 clear all vars 
 global ycoeff afac nfac ea istart g_index s_index  MW rhos0 gsp nsp  masslossrate 
 
+tic 
+
 load ('ranzi_pyro_kinetics_gentile2017.mat');
 MW(47)=28;
 ycoeff(47,:)=0;
@@ -35,9 +37,9 @@ m0(17,:) = 15/MW(17); % HCE
 m0(24,:) = 0/MW(24); % LIGH
 m0(25,:) = 23.5/MW(25); % LIGO
 m0(23,:) = 0/MW(23); % LIGC
-m0(38,:) = 22.3/MW(38); %TGL
-m0(37,:) = 3.1/MW(37); %CTANN
-m0(39,:) = 0.0/MW(39); %moisture
+m0(38,:) = 22.3/MW(38); % TGL
+m0(37,:) = 3.1/MW(37); % TANN
+m0(39,:) = 0.0/MW(39); % moisture
 
 %% initialize mass calcs 
 
@@ -53,7 +55,7 @@ y0 = [mass0(:); rhos_mass0(:)];
 T0 = 300; % initial temperature
 Tend = 700; % final temperature
 dt = 1;
-beta = 10/60; %rate of temperature change (K/s)
+beta = 10/60; % rate of temperature change (K/s)
 nstep = fix((Tend-T0)/beta)*(1/dt);
 time = 0;
 t = zeros(nstep+1,1); 
@@ -83,21 +85,24 @@ end
 
 %% plot
 
-figure(1); clf
-hold on;
-plot(T, yy(:,end));
-% xlim([300 1250]);
-% ylim([0 100]);
-xlabel('Temp [K]');
-ylabel('mass %');
-title('mass % evolution wrt T');
+% figure(1); clf
+% hold on;
+% plot(T, yy(:,end));
+% % xlim([300 1250]);
+% % ylim([0 100]);
+% xlabel('Temp [K]');
+% ylabel('mass %');
+% title('mass % evolution wrt T');
+% 
+% figure(2); clf
+% plot(T, -mlr);
+% xlabel('Temperature [K]');
+% ylabel('mlr, DTG');
+% title('Mass loss rate (mlr, DTG) wrt T');
+% hold off;
 
-figure(2); clf
-plot(T, -mlr);
-xlabel('Temperature [K]');
-ylabel('mlr, DTG');
-title('Mass loss rate (mlr, DTG) wrt T');
-hold off;
+t_elaspsed = toc;
+toc
 
 %% define functions 
 
@@ -128,12 +133,12 @@ global ycoeff afac nfac ea istart s_index g_index MW nsp masslossrate yje
     for i=1:Mesh.Jnodes
         yi(:,i) = m(s_index,i).*MW(s_index)./sum(m(s_index,i).*MW(s_index));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
-        mprime(:,i) = ycoeff*(k(:,i).*m(istart,i)).*MW; %dmdt
+        mprime(:,i) = ycoeff*(k(:,i).*m(istart,i)).*MW; % dm/dt
         wdot_mass(:,i) = mprime(:,i)./ Mesh.dv;
     end 
   
     for i=1:Mesh.Jnodes
-        drhosdt(i) = - sum(wdot_mass(g_index,i));
+        drhosdt(i) = -sum(wdot_mass(g_index,i));
     end
 
     masslossrate = sum(drhosdt);  
@@ -154,7 +159,7 @@ function phi = phii(yi,rho_s_mass)
 end
 
 function rho_sm = rhos_mass(yi,phi)
-%kg/m3
+% kg/m3
     global MW s_index
     
     s_density = [9.3745;9.3745;25;9.87000000000000;11.5050;11.5050;...
