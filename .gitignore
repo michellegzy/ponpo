@@ -162,3 +162,7 @@ cython_debug/
 # matlab orig and autosave files
 .orig
 .asv
+
+ # ok ill be even more specific:
+pyrolysis_ponpo.asv
+.DS_Store
