@@ -39,11 +39,11 @@ m0(25,:) = 23.5/MW(25); % LIGO
 m0(23,:) = 0/MW(23); % LIGC
 m0(38,:) = 22.3/MW(38); % TGL
 m0(37,:) = 3.1/MW(37); % TANN
-m0(39,:) = 0.0/MW(39); % moisture
+m0(39,:) = 0.1/MW(39); % moisture
 
 %% initialize mass calcs 
 
-mass0 = m0.*MW; %kg
+mass0 = m0.*MW; % kg
 %yi0 = mass0(s_index,1)./100;
 rhos_mass0 = rhos_mass0+100;
 sample_mass = Mesh.a*sample_height*rhos_mass0(1);
@@ -53,9 +53,9 @@ y0 = [mass0(:); rhos_mass0(:)];
 %% initial conditions
 
 T0 = 300; % initial temperature
-Tend = 700; % final temperature
+Tend = 1000; % final temperature
 dt = 1;
-beta = 10/60; % rate of temperature change (K/s)
+beta = 10/60; % rate of temperature change [K/s]
 nstep = fix((Tend-T0)/beta)*(1/dt);
 time = 0;
 t = zeros(nstep+1,1); 
@@ -76,7 +76,7 @@ for i=1:nstep
     tspan = [t(i) t(i)+dt];
     [t2,a] = ode113(@(t,y)yprime(time,y,Mesh,T(i)),tspan,yy(i,:),options);
     temp = a(end,:);
-    temp(temp<0)=1e-30;
+    temp(temp<0) = 1e-30;
     mlr(i+1) = masslossrate;
     yy(i+1,:) = temp;
     T(i+1) = T(i)+ beta*dt;
@@ -85,21 +85,21 @@ end
 
 %% plot
 
-% figure(1); clf
-% hold on;
-% plot(T, yy(:,end));
-% % xlim([300 1250]);
-% % ylim([0 100]);
-% xlabel('Temp [K]');
-% ylabel('mass %');
-% title('mass % evolution wrt T');
-% 
-% figure(2); clf
-% plot(T, -mlr);
-% xlabel('Temperature [K]');
-% ylabel('mlr, DTG');
-% title('Mass loss rate (mlr, DTG) wrt T');
-% hold off;
+figure(1); clf
+hold on;
+plot(T, yy(:,end));
+% xlim([300 1250]);
+% ylim([0 100]);
+xlabel('Temp [K]');
+ylabel('mass %');
+title('mass % evolution wrt T');
+
+figure(2); clf
+plot(T, -mlr);
+xlabel('Temperature [K]');
+ylabel('mlr, DTG');
+title('Mass loss rate (mlr, DTG) wrt T');
+hold off;
 
 t_elaspsed = toc;
 toc
