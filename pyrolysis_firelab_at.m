@@ -17,10 +17,10 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 
 %% setup mesh 
 
-Mesh.Jnodes = 3; % mesh size
-sample_height = 1e-2; % [m]
+Mesh.Jnodes = 3; % mesh size 
+sample_height = 3.7223e-4; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
-Mesh.a = 1e-2^2; % surface area, [m-2]
+Mesh.a = 4e-4; % surface area, [m2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -376,4 +376,4 @@ function phi = phii(yi,rho_s_mass)
     yi(18:end) = 0;
     phi = 1-sum(yi./(s_density.*MW(s_index)))*rho_s_mass;
 %     phi = .7432;
-end 
+end
