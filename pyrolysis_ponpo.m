@@ -18,9 +18,9 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size
-sample_height = 1e-2;
+sample_height = 1e-2; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
-Mesh.a = 1e-2^2; % surface area
+Mesh.a = 1e-2^2; % surface area, [m-2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -50,8 +50,9 @@ m0(39,:) = 0.05/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
-rhos_mass0 = rhos_mass0+380;
-sample_mass = Mesh.a*sample_height*rhos_mass0(1);
+sample_density = 380;
+rhos_mass0 = rhos_mass0+sample_density;
+sample_mass = Mesh.a*sample_height*rhos_mass0(1); 
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
 
 p0 = 1.013e5; % pressure [Pa]
