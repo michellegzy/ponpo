@@ -18,7 +18,7 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size 
-sample_height = 3.891e-3; % [m]
+sample_height = 2.244-3; % [m]
 sample_radius = sample_height/2; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
 pie = pi;
@@ -53,7 +53,9 @@ m0(39,:) = 0.05/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
-sample_density = 1076; % [kg/m3]
+inital_mass = 0.51255e-3; % [kg]
+initial_volume = pie*sample_radius^2*0.04; % [m3]
+sample_density = inital_mass/initial_volume; % [kg/m3]
 rhos_mass0 = rhos_mass0+sample_density;
 sample_mass = Mesh.a*sample_height*rhos_mass0(1);
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
