@@ -1,5 +1,5 @@
 %% pyrolysis for Fire Lab - MA fol (OR grape) 
-
+tic
 global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp tempflux p0 Kd yj0
 
 %% load species data and kinetics parameters
@@ -42,13 +42,13 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 
 % define # moles at each node (column) for corresp. species (row) by
 % inputting mass fracs
-m0(1,:) = 0.4254/MW(1); % CELL 
-m0(17,:) = 0.1927/MW(17); % HCE
-m0(24,:) = 0.0998/MW(24); % LIGH
-m0(25,:) = 0.0482/MW(25); % LIGO
-m0(23,:) = 0.1658/MW(23); % LIGC
-m0(38,:) = 0.0326/MW(38); % TGL
-m0(37,:) = 0.0354/MW(37); % TANN
+m0(1,:) = 0.2169/MW(1); % CELL 
+m0(17,:) = 0.20378/MW(17); % HCE
+m0(24,:) = (0.19548/3)/MW(24); % LIGH
+m0(25,:) = (0.19548/3)/MW(25); % LIGO
+m0(23,:) = (0.19548/3)/MW(23); % LIGC
+m0(38,:) = 0.0381/MW(38); % TGL
+m0(37,:) = 0.003608/MW(37); % TANN
 m0(39,:) = 0.05/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
@@ -143,7 +143,7 @@ dimensionless_rho = yy(:,end)/yy(1,end);
 % title('Mass loss rate (mlr, DTG) wrt T');
 % hold off;
 
-
+toc
 %% define functions 
 
 % ODE function for species transport equation
