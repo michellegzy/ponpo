@@ -18,11 +18,13 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size 
-sample_height = 2.9812e-4; % [m]
-sample_radius = sample_height/2; % [m]
+sample_height = 2.8917e-4; % [m]
+a_radius = 0.02; % [m]
+b_radius = 0.045; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
 pie = pi;
-Mesh.a = ((0.045/2)*(0.025/2))*pie; % surface area, ellipse [m2]
+% Mesh.a = 2*pie*a_radius*b_radius+sample_height*pie*(a_radius+b_radius); % surface area, ellipse [m2]
+Mesh.a = pie*a_radius*b_radius; % surface area, ellipse [m2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -47,13 +49,16 @@ m0(17,:) = 0.20378/MW(17); % HCE
 m0(24,:) = (0.19548/3)/MW(24); % LIGH
 m0(25,:) = (0.19548/3)/MW(25); % LIGO
 m0(23,:) = (0.19548/3)/MW(23); % LIGC
-m0(38,:) = 0.0381/MW(38); % TGL
+m0(38,:) = 0.006182/MW(38); % TGL
 m0(37,:) = 0.003608/MW(37); % TANN
 m0(39,:) = 0.05/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
-sample_density = 915; % [kg/m3]
+% sample_volume = (4/3)*pie*a_radius*b_radius*sample_height; % [m3]
+% initial_mass = 0.22117e-4; % [kg]
+% sample_density = initial_mass/sample_volume; % [kg/m3]
+sample_density = 915; % [kg/m3] estimate 
 rhos_mass0 = rhos_mass0+sample_density;
 sample_mass = Mesh.a*sample_height*rhos_mass0(1);
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
@@ -81,8 +86,8 @@ Kd = 1e-10; % porous fuel permeability
 
 %% ode solver options
 
-dt = .1;
-nstep = 20; % course mesh during testing
+dt = 1;
+nstep = 7; % course mesh during testing
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix

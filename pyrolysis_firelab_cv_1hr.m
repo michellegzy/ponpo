@@ -1,5 +1,5 @@
 %% pyrolysis for Fire Lab - CV 1hr wood (snowbrush) 
-
+tic
 global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp tempflux p0 Kd yj0
 
 %% load species data and kinetics parameters
@@ -144,7 +144,7 @@ dimensionless_rho = yy(:,end)/yy(1,end);
 % ylabel('mlr, DTG');
 % title('Mass loss rate (mlr, DTG) wrt T');
 % hold off;
-
+toc
 
 %% define functions 
 

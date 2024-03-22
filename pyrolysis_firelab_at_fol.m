@@ -1,6 +1,6 @@
 %% pyrolysis for Fire Lab - AT fol (sage) 
-
-global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp tempflux p0 Kd yj0
+tic
+global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp tempflux p0 Kd yj0 R
 
 %% load species data and kinetics parameters
 
@@ -18,9 +18,9 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size 
-sample_height = 3.7223e-4; % [m]
+sample_height = 3.7227e-4; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
-Mesh.a = 4e-4; % surface area, [m2]
+Mesh.a = 1.16995e-4; % surface area, prism [m2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -140,7 +140,7 @@ dimensionless_rho = yy(:,end)/yy(1,end);
 % ylabel('mlr, DTG');
 % title('Mass loss rate (mlr, DTG) wrt T');
 % hold off;
-
+toc
 
 %% define functions 
 
