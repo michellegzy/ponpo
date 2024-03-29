@@ -280,7 +280,7 @@ global ycoeff afac nfac ea istart s_index g_index qs MW deltah nsp
     rho_s_mass(:) = yy((nsp+1)*Mesh.Jnodes+1:(nsp+2)*Mesh.Jnodes);
     R = 8.314; 
     sigma = 5.670374419e-8; 
-    h = 10; % heat transfer coefficient [W/m2K]
+    h = 10; % heat transfer coefficient from top surface of sample [W/m2K]
     tr = 0;
     
     for i = 1:Mesh.Jnodes
