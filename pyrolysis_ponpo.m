@@ -18,7 +18,7 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size
-sample_height = 1e-2; % [m]
+sample_height = 3.8e-2; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
 Mesh.a = 1e-2^2; % surface area, [m-2]
 Mesh.dv = Mesh.a * Mesh.dz;
