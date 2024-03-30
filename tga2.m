@@ -32,14 +32,14 @@ rhos_mass0 = zeros(Mesh.Jnodes,1);
 
 m0 = zeros(47,Mesh.Jnodes);
 
-m0(1,:) = 19/MW(1); % CELL
+m0(1,:)  = 0; %19/MW(1); % CELL
 m0(17,:) = 15/MW(17); % HCE
-m0(24,:) = 0/MW(24); % LIGH
+m0(24,:) = 5/MW(24); % LIGH
 m0(25,:) = 23.5/MW(25); % LIGO
-m0(23,:) = 0/MW(23); % LIGC
-m0(38,:) = 22.3/MW(38); % TGL
+m0(23,:) = 5/MW(23); % LIGC
+m0(38,:) = 2.3/MW(38); % TGL
 m0(37,:) = 3.1/MW(37); % TANN
-m0(39,:) = 0.1/MW(39); % moisture
+m0(39,:) = 50/MW(39); % moisture
 
 %% initialize mass calcs 
 
@@ -55,7 +55,7 @@ y0 = [mass0(:); rhos_mass0(:)];
 T0 = 300; % initial temperature
 Tend = 1000; % final temperature
 dt = 1;
-beta = 10/60; % rate of temperature change [K/s]
+beta = 50/60; % rate of temperature change [K/s]
 nstep = fix((Tend-T0)/beta)*(1/dt);
 time = 0;
 t = zeros(nstep+1,1); 
