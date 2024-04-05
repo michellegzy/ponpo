@@ -20,7 +20,7 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 Mesh.Jnodes = 3; % mesh size 
 sample_height = 3.7227e-4; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
-Mesh.a = 1.16995e-4; % surface area, prism [m2]
+Mesh.a = (.02)*(.008); % surface area, triangle [m2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -71,7 +71,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 22510; % input heat flux [w/m2]
+qs = 24253; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -79,8 +79,8 @@ Kd = 1e-10; % porous fuel permeability
 
 %% ode solver options
 
-dt = .1;
-nstep = 20; % course mesh during testing
+dt = .5;
+nstep = 10; % course mesh during testing
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix
@@ -99,8 +99,8 @@ options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'BDF',0, 'MaxOrder',1);
 
 for i = 1:nstep
     tspan = [t(i) t(i)+dt];
-    [~,b] = ode113(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
-    [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
+    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
+    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
 
     temp = a(end,:);
     temp(temp<0) = 1e-30;
@@ -273,7 +273,7 @@ global ycoeff afac nfac ea istart s_index g_index qs MW deltah nsp
     rho_s_mass(:) = yy((nsp+1)*Mesh.Jnodes+1:(nsp+2)*Mesh.Jnodes);
     R = 8.314; 
     sigma = 5.670374419e-8; 
-    h = 10; % heat transfer coefficient [W/m2K]
+    h = 1600; % heat transfer coefficient [W/m2K]
     tr = 0;
     
     for i = 1:Mesh.Jnodes
