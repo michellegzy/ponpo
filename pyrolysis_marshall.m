@@ -109,8 +109,8 @@ options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'BDF',0, 'MaxOrder',1);
 for i = 1:nstep 
     qs = qs+0.33*5.67e-8*((0.8573*t(i)+305.22)^4-(0.579*t(i)+303.78)^4)+h_n2*((0.8573*t(i)+305.22)-(0.579*t(i)+303.78)); % dt; % heat flux as a function of furnace temp and time. only radiation
     tspan = [t(i) t(i)+dt];
-    [~,b] = ode113(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
-    [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
+    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
+    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
 
     temp = a(end,:);
     temp(temp<0) = 1e-30;
