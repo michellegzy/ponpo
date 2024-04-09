@@ -103,8 +103,8 @@ options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'BDF',0, 'MaxOrder',1);
 
 for i = 1:nstep
     tspan = [t(i) t(i)+dt];
-    [~,b] = ode113(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
-    [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
+    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
+    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
 
     temp = a(end,:);
     temp(temp<0) = 1e-30;
