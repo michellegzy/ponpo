@@ -23,7 +23,7 @@ Mesh.dz = sample_height/(Mesh.Jnodes);
 a_radius = 0.03; % [m]
 b_radius = 0.013; % [m]
 pie = pi;
-Mesh.a = (2*pie*a_radius*b_radius)+(sample_height*pie)*(a_radius+b_radius); % surface area, ellipse [m2] 
+Mesh.a = (2*pie*a_radius*b_radius);% +(sample_height*pie)*(a_radius+b_radius); % surface area, ellipse [m2] 
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -76,7 +76,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 22510; % input heat flux [w/m2]
+qs = 45000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -85,7 +85,7 @@ Kd = 1e-10; % porous fuel permeability
 %% ode solver options
 
 dt = .1;
-nstep = 20; % course mesh during testing
+nstep = 80; 
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix
