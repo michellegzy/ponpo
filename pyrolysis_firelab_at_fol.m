@@ -20,7 +20,7 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 Mesh.Jnodes = 3; % mesh size 
 sample_height = 3.7227e-4; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
-Mesh.a = (.02)*(.008); % surface area, triangle [m2]
+Mesh.a = ((.02)*(.008))/2; % surface area, triangle [m2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -40,14 +40,14 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 
 % define # moles at each node (column) for corresp. species (row) by
 % inputting mass fracs
-m0(1,:) = 0.4254/MW(1); % CELL 
-m0(17,:) = 0.1927/MW(17); % HCE
-m0(24,:) = 0.0998/MW(24); % LIGH
-m0(25,:) = 0.0482/MW(25); % LIGO
-m0(23,:) = 0.1658/MW(23); % LIGC
-m0(38,:) = 0.0326/MW(38); % TGL
+m0(1,:) = 0.1642/MW(1); % CELL 
+m0(17,:) = 0.10/MW(17); % HCE
+m0(24,:) = (0.05599/3)/MW(24); % LIGH
+m0(25,:) = (0.05599/3)/MW(25); % LIGO
+m0(23,:) = (0.05599/3)/MW(23); % LIGC
+m0(38,:) = 0.0766/MW(38); % TGL
 m0(37,:) = 0.0354/MW(37); % TANN
-m0(39,:) = 0.05/MW(39); % moisture
+m0(39,:) = 0.8/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
@@ -71,7 +71,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 24253; % input heat flux [w/m2]
+qs = 70000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -79,8 +79,8 @@ Kd = 1e-10; % porous fuel permeability
 
 %% ode solver options
 
-dt = .5;
-nstep = 10; % course mesh during testing
+dt = .1;
+nstep = 40; % course mesh during testing
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix

@@ -44,13 +44,13 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 
 % define # moles at each node (column) for corresp. species (row) by
 % inputting mass fracs
-m0(1,:) = 0.1649/MW(1); % CELL 
-m0(17,:) = (0.0919+0.1269)/MW(17); % HCE + starch - dairyland
-m0(24,:) = (0.1127/3)/MW(24); % LIGH
-m0(25,:) = (0.1127/3)/MW(25); % LIGO
-m0(23,:) = (0.1127/3)/MW(23); % LIGC
+m0(1,:) = 0.2169/MW(1); % CELL 
+m0(17,:) = (0.22068)/MW(17); % HCE + starch - dairyland
+m0(24,:) = (0.19548/3)/MW(24); % LIGH
+m0(25,:) = (0.19548/3)/MW(25); % LIGO
+m0(23,:) = (0.19548/3)/MW(23); % LIGC
 m0(38,:) = 0.0381/MW(38); % TGL
-m0(37,:) = 0.001/MW(37); % TANN
+m0(37,:) = 0.003608/MW(37); % TANN
 m0(39,:) = 0.8/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
@@ -78,7 +78,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 26000; % input heat flux [w/m2]
+qs = 70000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -87,7 +87,7 @@ Kd = 1e-10; % porous fuel permeability
 %% ode solver options
 
 dt = 0.1;
-nstep = 10; % course mesh during testing
+nstep = 40; % course mesh during testing
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix

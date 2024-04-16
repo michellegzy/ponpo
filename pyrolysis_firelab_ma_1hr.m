@@ -22,7 +22,7 @@ sample_height = 3.891e-3; % [m]
 sample_radius = sample_height/2; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
 % pie = pi;
-Mesh.a = .04; % [m] 2*pie*sample_radius*(.04+sample_radius); % surface area, [m2]
+Mesh.a = .04*sample_height; % [m] 2*pie*sample_radius*(.04+sample_radius); % surface area, [m2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
