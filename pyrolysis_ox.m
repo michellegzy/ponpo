@@ -1,13 +1,12 @@
 %% 1D pyrolysis solver by DBehnoudfar edited by Michelle Gee
+tic
+clear all vars
 
 global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp tempflux p0 Kd yj0
-
 %% load species data and kinetics parameters
 
-load ('updated_kinetics_transport_props_creck.mat');
-MW(47) = 32; % species # 47 is N2, this line and next line can be deleted once .mat file is updated
-MW(48) = 28;
-MW(49) = 1000;  %ASH ***********************************************
+load ('updated_kinetics.mat');
+
 ycoeff(48,:) = 0; % reaction coefficients for N2
 ycoeff(49,:) = 0; % reaction coefficients for ASH
 
@@ -148,7 +147,7 @@ ylabel('mlr, DTG');
 title('Mass loss rate (mlr, DTG) wrt T');
 hold off;
 
-
+toc
 %% define functions 
 
 % ODE function for species transport equation
