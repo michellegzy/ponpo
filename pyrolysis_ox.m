@@ -370,7 +370,7 @@ function q_srxns = q_srxns(T)
     
     deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000; -10300; 30700; 26000; -31100;...
        -26100; 46200; -21100; -83600; 1300; 1300; 10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 10000; 10000; 10000]*4.184; % added reactions for char
-    q_srxns = deltah./MW(istart);
+    q_srxns = deltah./MW(istart); % convert to J/kmol
     q_srxns(28) = -2.41e6;
 end
 
