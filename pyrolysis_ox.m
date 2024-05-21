@@ -1,6 +1,7 @@
-%% 1D pyrolysis solver by DBehnoudfar edited by Michelle Gee
+%% 1D pyrolysis solver by DBehnoudfar and Michelle Gee
+
 tic
-clear all vars
+clear vars
 
 global reactions afac nfac ea istart qs g_index s_index MW gsp ssp tempflux p0 Kd yj0
 %% load species data and kinetics parameters
@@ -52,21 +53,25 @@ m0(23,:) = 0.1658/MW(23); % LIGC
 m0(38,:) = 0.0326/MW(38); % TGL
 m0(37,:) = 0.0354/MW(37); % CTANN
 m0(39,:) = 0.05/MW(39); % moisture
-m0(49,:) = 0.05/MW(49); % ash
+m0(50,:) = 0.05/MW(49); % ash
 
-mass0 = m0.*MW; % kg
+mass0 = m0.*MW; % [kg]
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
-sample_density = 380;
+sample_density = 380; % [kg/m3]
 rhos_mass0 = rhos_mass0+sample_density;
 sample_mass = Mesh.a*sample_height*rhos_mass0(1); 
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
 
+% set environment
 p0 = 1.013e5; % pressure [Pa]
 yj0 = zeros(gsp,1); 
-yj0(end-1) = 0.21; % gas-phase species mass fraction. the next 2 lines define the gas environment for computations by the last species in reactions
-yj0(end) = 0.79;
-M = 1/sum(yj0./MW(g_index)); 
 R = 8.314; % univ gas ct [J/molK]
+
+% the next 2 lines define the gas environment for computations by the last
+% 2 species in the gas index array
+yj0(end-1) = 0.21; % O2, gas-phase species mass fraction
+yj0(end) = 0.79; % N2
+M = 1/sum(yj0./MW(g_index)); 
 
 rhog0 = zeros(Mesh.Jnodes,1); % gas-phase density
 rhog0 = rhog0 + (p0)*M/(R*T0(1));
@@ -86,11 +91,11 @@ Kd = 1e-10; % porous fuel permeability
 
 %% ode solver options
 
-dt = .1;
-nstep = 10; % course mesh during testing
-time = 0;
+dt = .1; 
+nstep = 10; 
+time = 0; 
 t = zeros(nstep+1,1); 
-yy = zeros(nstep+1,length(y0)); % species trassport equation solution matrix
+yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix
 yy1 = zeros(nstep+1,length(y10)); % heat equation solution matrix
 
 t(1) = 0;
@@ -98,7 +103,8 @@ yy(1,:) = y0;
 yy1(1,:) = y10;
 ye = zeros(length(t),length(g_index));
 j0 = zeros(length(t),1);
-Ts = zeros(length(t),1); Ts(1) = 300;
+Ts = zeros(length(t),1); 
+Ts(1) = 300;
 
 options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'BDF',0, 'MaxOrder',1);
 
@@ -112,13 +118,12 @@ for i = 1:nstep
     temp = a(end,:);
     temp(temp<0) = 1e-30;
     j0(i+1) = tempflux;
-	tempflux;
+	tempflux; % comment out? 
     yje = temp(:,end-gsp+1:end)./sum(temp(:,end-gsp+1:end),2);    
     ye(i+1,:) = yje;
     yy(i+1,:) = temp;
     yy1(i+1,:) = b(end,:);
     Ts(i+1) = yy1(i+1,ssp*Mesh.Jnodes+Mesh.Jnodes);
-    % Ts(i+1)
     t(i+1) = t(i) + dt;
 end
 
@@ -126,12 +131,12 @@ end
 
 dimensionless_rho = yy(:,end)/yy(1,end);
 
-figure(1); clf
-hold on;
-plot(t, dimensionless_rho);
-xlabel('time [s]');
-ylabel('density ratio');
-title('initial / final density over time');
+% figure(1); clf
+% hold on;
+% plot(t, dimensionless_rho);
+% xlabel('time [s]');
+% ylabel('density ratio');
+% title('initial / final density over time');
 
 % figure(2); clf
 % plot(T, yy(:,end));
@@ -140,13 +145,13 @@ title('initial / final density over time');
 % xlabel('Temp [K]');
 % ylabel('mass %');
 % title('mass % evolution wrt T');
-
-figure(3); clf
-plot(T, -mlr);
-xlabel('Temperature [K]');
-ylabel('mlr, DTG');
-title('Mass loss rate (mlr, DTG) wrt T');
-hold off;
+ 
+% figure(3); clf
+% plot(T, -mlr);
+% xlabel('Temperature [K]');
+% ylabel('mlr, DTG');
+% title('Mass loss rate (mlr, DTG) wrt T');
+% hold off;
 
 toc
 %% define functions 
@@ -157,7 +162,8 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
 %global reactions afac nfac ea istart s_index g_index MW gsp ssp tempflux p0 Kd
 
     wdot_mass = zeros(ssp,Mesh.Jnodes); % species production rate
-    k = zeros(28,Mesh.Jnodes); % reaction rate coefficient
+    %k = zeros(28,Mesh.Jnodes); % reaction rate coefficient
+    k = zeros(size(reactions,2), Mesh.Jnodes); % reaction rate coefficient
     m = zeros(ssp,Mesh.Jnodes); % mass
     phi = zeros(Mesh.Jnodes,1); % porosity
     kb = zeros(Mesh.Jnodes,1); % conductivity
