@@ -6,7 +6,7 @@ clear vars
 global reactions afac nfac ea istart qs g_index s_index MW gsp ssp tempflux p0 Kd yj0
 %% load species data and kinetics parameters
 
-load ('updated_kinetics2.mat');
+load ('updated_kinetics3.mat');
 
 % reactions(49,:) = 0; % reaction coefficients for N2
 % reactions(50,:) = 0; % reaction coefficients for ASH
@@ -19,14 +19,14 @@ gsp = length(g_index); % # of gas-phase species
 %s_index = [1 2 15 17 18 19 23 24 25 26 27 28 32 36 37 38 39 40 41 42 43 44 45 46 50];
 ssp = length(s_index); % # of solid-phase species
 MW = MW * 1e-3; % conversion from g/mol to kg/mol
-solid_densities = s_density.*MW(s_index)*1000; % convert array from __ to ____
+solid_densities = s_density.*MW(s_index)*1000; % convert array from mol/cm3 to g/cm3
 
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size
 sample_height = 3.8e-2; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
-Mesh.a = 1e-2^2; % surface area, [m-2]
+Mesh.a = 1e-2^2; % surface area, [m2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -75,7 +75,7 @@ M = 1/sum(yj0./MW(g_index));
 
 rhog0 = zeros(Mesh.Jnodes,1); % gas-phase density
 rhog0 = rhog0 + (p0)*M/(R*T0(1));
-rhogphi0 = rhog0*phii(yi0,rhos_mass0(1));
+rhogphi0 = rhog0*phii(yi0,rhos_mass0(1), solid_densities); % added input arg solid_densities
 rgpy0 = zeros(gsp,Mesh.Jnodes); % rhog * phi * y
 rgpy00 = rhogphi0(1).*yj0; 
 for i = 1:Mesh.Jnodes
@@ -86,7 +86,7 @@ rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 qs = 40000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
-phi = phii(yi0,rhos_mass0(1)); % fuel porosity
+phi = phii(yi0,rhos_mass0(1), solid_densities); % fuel porosity % added input arg solid_densities
 Kd = 1e-10; % porous fuel permeability
 
 %% ode solver options
@@ -106,7 +106,7 @@ j0 = zeros(length(t),1);
 Ts = zeros(length(t),1); 
 Ts(1) = 300;
 
-options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'BDF',0, 'MaxOrder',1);
+options1 = odeset('RelTol',1e-4,'AbsTol',1e-5,'BDF',0,'MaxOrder',1);
 
 %% time integration 
 
@@ -159,7 +159,7 @@ toc
 % ODE function for species trassport equation
 function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_index, g_index, MW, gsp, ssp, tempflux, p0, Kd)
 
-%global reactions afac nfac ea istart s_index g_index MW gsp ssp tempflux p0 Kd
+    %global reactions afac nfac ea istart s_index g_index MW gsp ssp tempflux p0 Kd
 
     wdot_mass = zeros(ssp,Mesh.Jnodes); % species production rate
     %k = zeros(28,Mesh.Jnodes); % reaction rate coefficient
@@ -260,9 +260,9 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
 end
 
 % ODE function for energy trassport
-function [dydt] = yprime1(t, yy, Mesh, reactions, afac, nfac, ea, istart, s_index, g_index, qs, MW, deltah, ssp)
+function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_index, g_index, qs, MW, deltah, ssp)
 
-%global reactions afac nfac ea istart s_index g_index qs MW deltah ssp 
+    global reactions afac nfac ea istart s_index g_index qs MW deltah ssp 
 
     wdot_mass = zeros(ssp,Mesh.Jnodes);
     k = zeros(28,Mesh.Jnodes);
@@ -365,7 +365,7 @@ end
 
 % heat capacity function
 function cp = cp(ssp, T)
-%global ssp
+    %global ssp
     % cp in [J/kg/K]
     cp = zeros(ssp,1)+(1.5+.001*T)*1000;
     cp(15) = (.7+.0035*T)*1000;
@@ -376,7 +376,7 @@ end
 
 % heat of reactions function
 function q_srxns = q_srxns(MW, istart, deltah, T)
-% J/kg of reactant
+    % J/kg of reactant
     %global MW istart
     
     %deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000; -10300; 30700; 26000; -31100;...
@@ -398,5 +398,5 @@ function phi = phii(yi, rho_s_mass, solid_densities)
     % s_density*1000;    
     yi(18:end) = 0;
     phi = 1-sum(yi./(solid_densities))*rho_s_mass;
-%     phi = .7432;
+    % phi = .7432;
 end
