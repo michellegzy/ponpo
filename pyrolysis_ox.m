@@ -3,7 +3,7 @@
 tic
 clear vars
 
-global reactions afac nfac ea istart qs g_index s_index MW gsp ssp tempflux p0 Kd yj0
+global reactions afac nfac ea istart qs g_index s_index MW gsp ssp tempflux p0 Kd yj0 MW_ssp
 %% load species data and kinetics parameters
 
 load ('updated_kinetics3.mat');
@@ -112,9 +112,9 @@ options1 = odeset('RelTol',1e-4,'AbsTol',1e-5,'BDF',0,'MaxOrder',1);
 %% time integration 
 
 for i = 1:nstep
-    tspan = [t(i) t(i)+dt];
-    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
-    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
+    tspan = [t(i), t(i)+dt];
+    [~,b] = ode15s(@(t,y)yprime1(t,y,Mesh),tspan,yy1(i,:),options1);
+    [~,a] = ode15s(@(t,y)yprime(t,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
 
     temp = a(end,:);
     temp(temp<0) = 1e-30;
@@ -263,7 +263,7 @@ end
 % ODE function for energy trassport
 function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_index, g_index, qs, MW, deltah, ssp)
 
-    global reactions afac nfac ea istart s_index g_index qs MW deltah ssp 
+    global reactions afac nfac ea istart s_index g_index qs MW deltah ssp MW_ssp
 
     wdot_mass = zeros(ssp,Mesh.Jnodes);
     k = zeros(28,Mesh.Jnodes);
@@ -290,7 +290,8 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
     tr = 0;
     
     for i = 1:Mesh.Jnodes
-        yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
+        % yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
+        yi(:,i) = m(s_index).*MW_ssp./sum(m(s_index).*MW_ssp);
         phi(i) = phii(yi(:,i),rho_s_mass(i));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
         mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
