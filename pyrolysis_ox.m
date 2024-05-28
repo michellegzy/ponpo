@@ -19,7 +19,8 @@ gsp = length(g_index); % # of gas-phase species
 %s_index = [1 2 15 17 18 19 23 24 25 26 27 28 32 36 37 38 39 40 41 42 43 44 45 46 50];
 ssp = length(s_index); % # of solid-phase species
 MW = MW * 1e-3; % conversion from g/mol to kg/mol
-solid_densities = s_density.*MW(s_index)*1000; % convert array from mol/cm3 to g/cm3
+MW_ssp = MW(s_index);
+solid_densities = s_density.*MW_ssp*1000; % convert array from mol/cm3 to g/cm3
 
 %% setup mesh 
 
@@ -199,7 +200,7 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
     air(end) = 1;
     
     for i = 1:Mesh.Jnodes
-        yi(:,i) = m(s_index,i).*MW(s_index)./sum(m(s_index,i).*MW(s_index));
+        yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
         phi(i) = phii(yi(:,i),rho_s_mass(i));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
         mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
@@ -277,7 +278,7 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
     
     for i = 1:Mesh.Jnodes
         m(:,i) = yy(ssp*(i-1)+1:ssp*(i-1)+ssp);
-        m(:,i) = m(:,i)./MW;
+        m(:,i) = m(:,i)./(MW_ssp); % element-by-element division by solid species MW
     end
     
     yi = zeros(length(s_index),Mesh.Jnodes);
@@ -289,7 +290,7 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
     tr = 0;
     
     for i = 1:Mesh.Jnodes
-        yi(:,i) = m(s_index,i).*MW(s_index)./sum(m(s_index,i).*MW(s_index));
+        yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
         phi(i) = phii(yi(:,i),rho_s_mass(i));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
         mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
@@ -382,7 +383,7 @@ function q_srxns = q_srxns(MW, istart, deltah, T)
     %deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000; -10300; 30700; 26000; -31100;...
      %  -26100; 46200; -21100; -83600; 1300; 1300; 10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 10000; 10000; 10000]*4.184; % added reactions for char
     q_srxns = deltah*4.184./MW(istart); % convert to J/kmol
-    q_srxns(28) = -2.41e6;
+    q_srxns(length(reactions(i,:))) = -2.41e6; %changed from hardcoded "(28)" trying to get l# of reactions in here 
 end
 
 % porosity function
