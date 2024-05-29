@@ -266,8 +266,11 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
     global reactions afac nfac ea istart s_index g_index qs MW deltah ssp MW_ssp
 
     wdot_mass = zeros(ssp,Mesh.Jnodes);
-    k = zeros(28,Mesh.Jnodes);
+    %k = zeros(28,Mesh.Jnodes);
+    k = zeros(length(nfac), Mesh.Jnodes);
     m = zeros(ssp,Mesh.Jnodes);
+    MW_ssp = MW_ssp(Mesh.Jnodes,:); %%%%%%%%%%%% array sizing debugging
+    %MW_ssp = (MW_ssp, Mesh.Jnodes);
     phi = zeros(Mesh.Jnodes,1);
     kb = zeros(Mesh.Jnodes,1);
     e = zeros(Mesh.Jnodes,1);
@@ -290,8 +293,9 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
     tr = 0;
     
     for i = 1:Mesh.Jnodes
-        % yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
-        yi(:,i) = m(s_index).*MW_ssp./sum(m(s_index).*MW_ssp);
+        yi(:, i) = m(s_index(i), :) .* MW_ssp ./ sum(m(s_index(i), :) .* MW_ssp);
+        %yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
+        %yi(:,i) = m(s_index).*MW_ssp./sum(m(s_index).*MW_ssp);
         phi(i) = phii(yi(:,i),rho_s_mass(i));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
         mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
