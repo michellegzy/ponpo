@@ -3,10 +3,10 @@
 tic
 clear vars
 
-global reactions afac nfac ea istart qs g_index s_index MW gsp ssp tempflux p0 Kd yj0 MW_ssp
+global reactions afac nfac ea istart qs g_index s_index MW gsp ssp tempflux p0 Kd yj0 MW_ssp_transposed nsp solid_densities reaction_order
 %% load species data and kinetics parameters
 
-load ('updated_kinetics3.mat');
+load('updated_kinetics4.mat');
 
 % reactions(49,:) = 0; % reaction coefficients for N2
 % reactions(50,:) = 0; % reaction coefficients for ASH
@@ -18,9 +18,10 @@ gsp = length(g_index); % # of gas-phase species
 % solid-phase species indices
 %s_index = [1 2 15 17 18 19 23 24 25 26 27 28 32 36 37 38 39 40 41 42 43 44 45 46 50];
 ssp = length(s_index); % # of solid-phase species
+nsp = gsp+ssp; % add gas and solid species vectors for total number of species
 MW = MW * 1e-3; % conversion from g/mol to kg/mol
-MW_ssp = MW(s_index);
-solid_densities = s_density.*MW_ssp*1000; % convert array from mol/cm3 to g/cm3
+MW_ssp_transposed = MW(s_index)'; % transpose solid molecular weight vector
+solid_densities = s_density.*MW_ssp_transposed*1000; % convert array from mol/cm3 to g/cm3
 
 %% setup mesh 
 
@@ -41,7 +42,7 @@ for j = 1:Mesh.Jnodes
     T0(j) = Tinitial; 
 end
 
-m0 = zeros((ssp+gsp),Mesh.Jnodes); % mole storage matrix
+m0 = zeros(nsp, Mesh.Jnodes); %(ssp+gsp),Mesh.Jnodes); % mole storage matrix
 
 %% set initial composition and conditions
 
@@ -157,8 +158,8 @@ dimensionless_rho = yy(:,end)/yy(1,end);
 toc
 %% define functions 
 
-% ODE function for species trassport equation
-function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_index, g_index, MW, gsp, ssp, tempflux, p0, Kd)
+% ODE function for species transport equation
+function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_index, g_index, MW, gsp, ssp, tempflux, p0, Kd, reaction_order)
 
     %global reactions afac nfac ea istart s_index g_index MW gsp ssp tempflux p0 Kd
 
@@ -192,7 +193,7 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
     rgpy = reshape(yy(Mesh.Jnodes+1:end),gsp,Mesh.Jnodes);
 
     for i = 1:gsp
-        yj(i,:) = rgpy(i,:)./trasspose(rhogphi(:));
+        yj(i,:) = rgpy(i,:)./transpose(rhogphi(:)); %%%%%%%%%% 'trasspose' -> 'transpose'
     end
     
     %R = 8.314; 
@@ -200,11 +201,14 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
     air(end) = 1;
     
     for i = 1:Mesh.Jnodes
-        yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
+        yi(:,i) = m(s_index,i).*MW_ssp_transposed./sum(m(s_index,i).*MW_ssp_transposed);
         phi(i) = phii(yi(:,i),rho_s_mass(i));
-        k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
-        mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
-        wdot_mass(:,i) = mprime(:,i)./ Mesh.dv;
+        k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i))); % arrhenius eqn
+        %mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
+        %mprime(:,i) = reactions*(k(:,i).*((m(istart,i))).^(reaction_order)).*MW; % dm/dt with attempt at reaction order implementation
+        dummy = m(:,i);
+        mprime(:,i) = reactions*(k(:,i).*prod((dummy(istart).^reaction_order),2)).*MW;
+        wdot_mass(:,i) = mprime(:,i)./ Mesh.dv; 
         kb(i) = kba(T(i),yi(:,i), phi(i),rho_s_mass(i)); % thermal conductivity [W/m/K]
         e(i) = epsilon(yi(:,i),rho_s_mass(i),phi(i));
         M = 1/sum(yj(:,i)./MW(g_index)); 
@@ -260,51 +264,50 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
     dydt = [drhogphidt(:); drgpydt(:)];  
 end
 
-% ODE function for energy trassport
+% ODE function for energy transport
 function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_index, g_index, qs, MW, deltah, ssp)
 
-    global reactions afac nfac ea istart s_index g_index qs MW deltah ssp MW_ssp
+    global reactions afac nfac ea istart s_index g_index qs MW deltah ssp MW_ssp_transposed nsp solid_densities reaction_order
 
-    wdot_mass = zeros(ssp,Mesh.Jnodes);
-    %k = zeros(28,Mesh.Jnodes);
-    k = zeros(length(nfac), Mesh.Jnodes);
-    m = zeros(ssp,Mesh.Jnodes);
-    MW_ssp = MW_ssp(Mesh.Jnodes,:); %%%%%%%%%%%% array sizing debugging
-    %MW_ssp = (MW_ssp, Mesh.Jnodes);
+    wdot_mass = zeros(nsp,Mesh.Jnodes);
+    k = zeros(length(afac),Mesh.Jnodes);
+    m = zeros(nsp,Mesh.Jnodes);
     phi = zeros(Mesh.Jnodes,1);
     kb = zeros(Mesh.Jnodes,1);
     e = zeros(Mesh.Jnodes,1);
     rho_s_mass = zeros(Mesh.Jnodes,1);
     drhosdt = zeros(Mesh.Jnodes,1);
-    mprime = zeros(ssp,Mesh.Jnodes);
+    mprime = zeros(nsp,Mesh.Jnodes);
     Tprime = zeros(Mesh.Jnodes,1);   
     
     for i = 1:Mesh.Jnodes
-        m(:,i) = yy(ssp*(i-1)+1:ssp*(i-1)+ssp);
-        m(:,i) = m(:,i)./(MW_ssp); % element-by-element division by solid species MW
+        m(:,i) = yy(nsp*(i-1)+1:nsp*(i-1)+nsp);
+        m(:,i) = m(:,i)./MW; % element-by-element division by solid species MW
     end
     
     yi = zeros(length(s_index),Mesh.Jnodes);
-    T = yy(ssp*Mesh.Jnodes+1:(ssp+1)*Mesh.Jnodes);
-    rho_s_mass(:) = yy((ssp+1)*Mesh.Jnodes+1:(ssp+2)*Mesh.Jnodes);
-    % R = 8.314; % univ gas ct [J/molK]
+    T = yy(nsp*Mesh.Jnodes+1:(nsp+1)*Mesh.Jnodes);
+    rho_s_mass(:) = yy((nsp+1)*Mesh.Jnodes+1:(nsp+2)*Mesh.Jnodes);
+     R = 8.314; % univ gas ct [J/molK]
     sigma = 5.670374419e-8; % sb const for rad [W/(m2K4)]
     h = 10; % heat transfer coefficient for heat xfr from heated surface to surroundings
     tr = 0;
     
-    for i = 1:Mesh.Jnodes
-        yi(:, i) = m(s_index(i), :) .* MW_ssp ./ sum(m(s_index(i), :) .* MW_ssp);
-        %yi(:,i) = m(s_index,i).*MW_ssp./sum(m(s_index,i).*MW_ssp);
-        %yi(:,i) = m(s_index).*MW_ssp./sum(m(s_index).*MW_ssp);
-        phi(i) = phii(yi(:,i),rho_s_mass(i));
+    for i = 1:Mesh.Jnodes % all nodes
+        % yi(:,i) = m(s_index,i).*MW_ssp_transposed./sum(m(s_index,i).*MW_ssp_transposed);
+        yi(:,i) = m(s_index,i).*MW(s_index)./sum(m(s_index,i).*MW(s_index));
+        phi(i) = phii(yi(:,i),rho_s_mass(i),solid_densities);
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
-        mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
+        %mprime(:,i) = reactions*(k(:,i).*m(istart,i)).*MW; % dm/dt
+        %mprime(:,i) = reactions*(k(:,i).*((m(istart,i))).^(reaction_order(i)).*MW; % dm/dt with attempt at reaction order implementation
+        dummy = m(:,i);
+        mprime(:,i) = reactions*(k(:,i).*prod((dummy(istart).^reaction_order),2)).*MW;
         wdot_mass(:,i) = mprime(:,i)./ Mesh.dv;
-        kb(i) = kba(T(i),yi(:,i), phi(i),rho_s_mass(i)); % thermal conductivity W/m/K
+        kb(i) = kba(T(i),yi(:,i), phi(i),rho_s_mass(i)); % thermal conductivity W/mK
         e(i) = epsilon(yi(:,i),rho_s_mass(i),phi(i));
     end 
     
-    for j = 2:Mesh.Jnodes-1
+    for j = 2:Mesh.Jnodes-1 % interior nodes
        ddd = cp(T(j));
        deltah = q_srxns(T(end));
        Tprime(j) = (1/(Mesh.dz^2)*((kb(j)+kb(j+1))/2*(T(j+1)-T(j))+(kb(j)+kb(j-1))/2*(T(j-1)-T(j)))...
@@ -330,9 +333,9 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
 end
 
 % conductivity function
-function kb = kba(T, yi, phi, rho_s_mass, s_index, solid_densities)
+function kb = kba(T, yi, phi, rho_s_mass) %, s_index, solid_densities)
     % [W/m/K]
-    %global s_index MW
+    global s_index solid_densities % MW
 
     k = zeros(length(s_index),1)+.17*(T/300)^.594;
     k(19) = .6;
@@ -403,6 +406,6 @@ function phi = phii(yi, rho_s_mass, solid_densities)
         %0.0101350128633761;0.00507436386823035;0.00579578562602859; 1777777]*1000; 
     % s_density*1000;    
     yi(18:end) = 0;
-    phi = 1-sum(yi./(solid_densities))*rho_s_mass;
+    phi = 1-sum(yi./(solid_densities)')*rho_s_mass;
     % phi = .7432;
 end
