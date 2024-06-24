@@ -47,15 +47,15 @@ m0 = zeros(nsp, Mesh.Jnodes); %(ssp+gsp),Mesh.Jnodes); % mole storage matrix
 %% set initial composition and conditions
 
 % define # moles at each node (column) for corresp. species (row)
-m0(1,:) = 0.4254/MW(1); % CELL 
+m0(1,:) = 0.4254/MW(1);   % CELL 
 m0(17,:) = 0.1927/MW(17); % HCE
 m0(24,:) = 0.0998/MW(24); % LIGH
 m0(25,:) = 0.0482/MW(25); % LIGO
 m0(23,:) = 0.1658/MW(23); % LIGC
 m0(38,:) = 0.0326/MW(38); % TGL
 m0(37,:) = 0.0354/MW(37); % CTANN
-m0(39,:) = 0.05/MW(39); % moisture
-m0(50,:) = 0.05/MW(49); % ash
+m0(39,:) = 0.05/MW(39);   % moisture
+m0(50,:) = 0.05/MW(49);   % ash
 
 mass0 = m0.*MW; % [kg]
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
@@ -303,7 +303,8 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
         dummy = m(:,i);
         mprime(:,i) = reactions*(k(:,i).*prod((dummy(istart).^reaction_order),2)).*MW;
         wdot_mass(:,i) = mprime(:,i)./ Mesh.dv;
-        kb(i) = kba(T(i),yi(:,i), phi(i),rho_s_mass(i)); % thermal conductivity W/mK
+        %kb(i) = kba(T(i),yi(:,i), phi(i),rho_s_mass(i)); % thermal conductivity W/mK
+        kb(i) = kba(T(i),yi(i,:),phi(i),rho_s_mass(i)); % thermal conductivity W/mK
         e(i) = epsilon(yi(:,i),rho_s_mass(i),phi(i));
     end 
     
