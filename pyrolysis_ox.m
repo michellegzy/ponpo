@@ -106,9 +106,9 @@ yy1(1,:) = y10;
 ye = zeros(length(t),length(g_index));
 j0 = zeros(length(t),1);
 Ts = zeros(length(t),1); 
-Ts(1) = 300;
+Ts(1) = 300; % starting temp [K]
 
-options1 = odeset('RelTol',1e-4,'AbsTol',1e-5,'BDF',0,'MaxOrder',1);
+options1 = odeset('RelTol',1e-4,'AbsTol',1e-5); %,'BDF',0,'MaxOrder',1);
 
 %% time integration 
 
@@ -166,6 +166,7 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
     wdot_mass = zeros(ssp,Mesh.Jnodes); % species production rate
     %k = zeros(28,Mesh.Jnodes); % reaction rate coefficient
     k = zeros(size(reactions,2), Mesh.Jnodes); % reaction rate coefficient
+    %k = zeros(length(afac),Mesh.Jnodes);
     m = zeros(ssp,Mesh.Jnodes); % mass
     phi = zeros(Mesh.Jnodes,1); % porosity
     kb = zeros(Mesh.Jnodes,1); % conductivity
@@ -187,8 +188,9 @@ function [dydt] = yprime(t,yy,Mesh,yy1, reactions, afac, nfac, ea, istart, s_ind
     end
     
     yi = zeros(length(s_index),Mesh.Jnodes);
-    T = yy1(ssp*Mesh.Jnodes+1:(ssp+1)*Mesh.Jnodes);
-    rho_s_mass(:) = yy1((ssp+1)*Mesh.Jnodes+1:(ssp+2)*Mesh.Jnodes);
+    T = yy1(nsp*Mesh.Jnodes+1:(nsp+1)*Mesh.Jnodes);
+    %rho_s_mass(:) = yy1((ssp+1)*Mesh.Jnodes+1:(ssp+2)*Mesh.Jnodes);
+    rho_s_mass(:) = yy1((nsp+1)*Mesh.Jnodes+1:(nsp+2)*Mesh.Jnodes);
     rhogphi(:) = yy(1:Mesh.Jnodes);
     rgpy = reshape(yy(Mesh.Jnodes+1:end),gsp,Mesh.Jnodes);
 
@@ -307,7 +309,8 @@ function [dydt] = yprime1(t, yy, Mesh) %, reactions, afac, nfac, ea, istart, s_i
         kb(i) = kba(T(i),yi(i,:),phi(i),rho_s_mass(i)); % thermal conductivity W/mK
         e(i) = epsilon(yi(:,i),rho_s_mass(i),phi(i));
     end 
-    
+    %        kb(i)= kba(T(i),yi(:,i), phi(i),rhos(i)); 
+
     for j = 2:Mesh.Jnodes-1 % interior nodes
        ddd = cp(T(j));
        deltah = q_srxns(T(end));
