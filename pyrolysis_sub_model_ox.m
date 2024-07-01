@@ -18,7 +18,7 @@
 tic; % start timer
 
 % load reaction rates parameters 
-load('solid_kinetics_data.mat'); 
+load ('solid_kinetic_data.mat');
 
 
 % mesh set-up
@@ -276,8 +276,8 @@ global reactions afac nfac ea reactants s_index g_index qs MW deltah nsp reactio
     
     R = 8.314; 
     sigma = 5.670374419e-8; 
-	h = 10; % heat transfer coefficient at top boundary
-	tr = 0;
+	h =10; % heat transfer coefficient at top boundary
+	tr=0;
     
     
     for i=1:Mesh.Jnodes
@@ -328,30 +328,30 @@ end
 % function defining heat conductivity [W/m/K]
 function kb = kba(T,yi,phi,rho_s_mass)
     
-    global s_index MW
+    global s_index solid_densities % MW
     k = zeros(length(s_index),1)+.17*(T/300)^.594;
     k(19)=.6;
     k(3)=.065*(T/300)^.435+5.670374419e-8*3.3e-3*(T)^3;
    
-    s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
-	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index)*1000; 
+    % s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
+	% 5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index)*1000; 
     yi(18:end)=0;
-    kb = rho_s_mass*sum(yi.*k./(s_density))/(1-phi);
+    kb = rho_s_mass*sum(yi.*k./(solid_densities))/(1-phi);
     
 end
 
 % function defining emissivity 
 function e = epsilon(yi,rho_s_mass,phi)
-    global s_index MW
+    global s_index solid_densities % MW
     e = zeros(length(s_index),1)+0.757;
     e(3)=0.957; % char
     e(19)=.95; %H2O
 
-    s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;5;1.67;...
-        55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index)*1000; 
-    
+    % s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;5;1.67;...
+    %     55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index)*1000; 
+
     yi(18:end)=0;
-    e = rho_s_mass*sum(yi.*e./(s_density))/(1-phi);
+    e = rho_s_mass*sum(yi.*e./(solid_densities))/(1-phi);
 end 
 
 % function defining heat capacity [J/kg/K]
@@ -368,11 +368,12 @@ end
 % function defining heat of reactions [J/kg of reactant]
 function q_srxns = q_srxns(T)
 
-    global reactions MW reactants
+    global MW reactants deltah % reactions
     
-    deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000;...
-	-10300; 30700; 26000; -31100; -26100; 46200; -21100; -83600; 1300; 1300;...
-	10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 1]*4.184;
+    % deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000;...
+	% -10300; 30700; 26000; -31100; -26100; 46200; -21100; -83600; 1300; 1300;...
+	% 10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 1]*4.184;
+    deltah.*4.184;
     q_srxns = deltah./MW(reactants(:,1));
     q_srxns(28) = -2.41e6;
 end
@@ -380,10 +381,10 @@ end
 % function defining porosity 
 function phi = phii(yi,rho_s_mass)
     
-    global MW s_index
+    global solid_densities % MW s_index
     
-    s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
-	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058]*1000;
+    % s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
+	% 5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058]*1000;
     yi(18:end)=0;
-    phi = 1-sum(yi./(s_density.*MW(s_index)))*rho_s_mass;
+    phi = 1-sum(yi./(solid_densities))*rho_s_mass;
 end
