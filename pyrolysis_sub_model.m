@@ -15,7 +15,7 @@
 % , gas_rho*g*phi*y_gas_species2_cell_1, ..., gas_rho*g*phi*y_gas_speciesM_cell_1, ...
 % , gas_rho*g*phi*y_gas_species1_cell_2, ... , gas_rho*g*phi*y_gas_speciesM_cell_N]
 
-
+tic; %start timer
 
 % load reaction rates parameters 
 load('solid_kinetics_data_v1.mat');
@@ -24,9 +24,10 @@ load('solid_kinetics_data_v1.mat');
 % mesh set-up
 
 Mesh.Jnodes = 3; % number of cells
-sample_height = 3.8e-2;
+sample_height = 0.399e-3;
 Mesh.dz = sample_height/(Mesh.Jnodes); 
-Mesh.a = 3.8e-2^2; % cross-sectional area of each cell 
+Mesh.a = (sample_height)^2;
+%Mesh.a = 3.8e-2^2; % cross-sectional area of each cell 
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %%%% initial conditions  %%%%%%%%%%%%
@@ -37,26 +38,28 @@ Mesh.dv = Mesh.a * Mesh.dz;
 % 's_index' stores the indices of solid-phase species
 % MW stores moecular weight of species (Kg/mol)
 
-global afac nfac ea reaction_order qs g_index s_index MW gsp nsp p0 yj0 tempflux reactions % ycoeff
+global qs g_index s_index MW gsp nsp p0 yj0 tempflux R % ycoeff reactions afac nfac ea reaction_order
 
 nsp = length(species);
 gsp = length(g_index);
 
 
-T0 = zeros(Mesh.Jnodes,1) + 300;  %temperature (K)
+T0 = zeros(Mesh.Jnodes,1) + 300;  % temperature [K]
 mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 
-%white pine
-mass0(1,:) = 0.4254; % CELL
-mass0(17,:) = 0.1927; % HCE
-mass0(24,:) = 0.0998; % LIGH
-mass0(25,:) = 0.0482; % LIGO
-mass0(23,:) = 0.1658; % LIGC
-mass0(38,:) = 0.0326; %TGL
-mass0(37,:) = 0.0354; %CTANN
-mass0(39,:) = 0.05; %moisture
+% initial mass fractions 
+mass0(1,:)  = 0.0917;  % CELL
+mass0(17,:) = 0.332; % HCE
+mass0(24,:) = (0.3812/3); % LIGH
+mass0(25,:) = (0.3812/3); % LIGO
+mass0(23,:) = (0.3812/3); % LIGC
+mass0(38,:) = 0.111; % TGL
+mass0(37,:) = 0.0354; % TANN
+mass0(39,:) = 0.80;   % moisture
 
-rhos0 = zeros(Mesh.Jnodes,1) + 380*(1+mass0(39,1)); % initial solid density (Kg/m3)
+initial_density = 657; % solid, [kg/m3]
+rhos0 = zeros(Mesh.Jnodes,1) + initial_density*(1+mass0(39,1));
+% rhos0 = zeros(Mesh.Jnodes,1) + 380*(1+mass0(39,1)); % initial solid density (Kg/m3)
 sample_mass = Mesh.a*sample_height*rhos0(1);
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
 y10 = [mass0(:); T0(:); rhos0(:)]; % initial solution vector y1
@@ -65,7 +68,11 @@ yi0 = mass0(s_index,1)./sum(mass0(s_index,1)); % initial solid mass fraction
 
 p0 = 1.013e5; %initial pressure (Pa)
 yj0 = zeros(gsp,1);  % initial gas mass fraction
-yj0(end) = 1;  % only N2 present
+% yj0(end) = 1;  % only N2 present
+% the next 2 lines define the gas environment for computations by the last
+% 2 species in the gas index array
+yj0(end-1) = 0.21; % O2, gas-phase species mass fraction
+yj0(end) = 0.79; % N2
 M = 1/sum(yj0./MW(g_index)); % average MW
 R = 8.314; % gas constant
 rhog0 = zeros(Mesh.Jnodes,1) + (p0)*M/(R*T0(1)); % initial gas density (Kg/m3)
@@ -80,7 +87,7 @@ qs = 40000;
 %%% variable initialization  %%%%%%%%%%%%%
 
 dt =.1; % time step size
-nstep = 10; % number of time steps
+nstep = 1020; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -94,7 +101,7 @@ yy1 = zeros(nstep+1,length(y10));
 yy(1,:) = y20;
 yy1(1,:) = y10;
 
-ye = zeros(length(t),length(g_index)); %mass fraction of gaseous species at top surface
+ye = zeros(length(t),length(g_index)); % mass fraction of gaseous species at top surface
 j0 = zeros(length(t),1); % mass flux of gaseous products at top surface
 Ts = zeros(length(t),1); % temperature at top surface
 Ts(1) = 300;
@@ -124,8 +131,7 @@ end
 
 % save pyrolysis_data.mat yy ye j0 Ts yy1
  
-
-
+toc; % end timer
 
 % ODE function y2'
 
