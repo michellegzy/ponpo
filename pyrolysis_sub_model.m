@@ -38,7 +38,7 @@ Mesh.dv = Mesh.a * Mesh.dz;
 % 's_index' stores the indices of solid-phase species
 % MW stores moecular weight of species (Kg/mol)
 
-global qs g_index s_index MW gsp nsp p0 yj0 tempflux R % ycoeff reactions afac nfac ea reaction_order
+global qs g_index s_index MW gsp nsp p0 yj0 tempflux R reactants reactions afac nfac ea reaction_order % ycoeff 
 
 nsp = length(species);
 gsp = length(g_index);
@@ -81,13 +81,13 @@ rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
 % input radiative heat flux (W/m2)
-qs = 40000; 
+qs = 26000; 
 
 
 %%% variable initialization  %%%%%%%%%%%%%
 
 dt =.1; % time step size
-nstep = 1020; % number of time steps
+nstep = 200; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -113,10 +113,10 @@ options = odeset('RelTol',1.e-4,'AbsTol',1e-5);
 
 for i=1:nstep
     tspan = [t(i) t(i)+dt];
-    [~,b] = ode113(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options); % equation 1
-    [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options); % equation 2
+    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options); % equation 1
+    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options); % equation 2
 	
-	% this step ensures the mass fration values are non-negative
+	% this step ensures the mass fraction values are non-negative
     temp = a(end,:);
     temp(temp<0)=1e-30;
 	
