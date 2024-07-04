@@ -12,7 +12,7 @@ ycoeff(47,:) = 0; % reaction coefficients
 % gas-phase species indices
 g_index = [3 4 5 6 7 8 9 10 11 12 13 14 16 20 21 22 29 30 31 33 34 35 47];
 gsp = length(g_index); % # of gas-phase species
-nsp = 47;  % # of solid-phase species
+nsp = 47;  % # of species
 % solid-phase species indices
 s_index = [1 2 15 17 18 19 23 24 25 26 27 28 32 36 37 38 39 40 41 42 43 44 45 46];
 MW = MW * 1e-3; % conversion from g/mol to kg/mol
@@ -47,7 +47,7 @@ m0(24,:) = (0.3812/3)/MW(24); % LIGH
 m0(25,:) = (0.3812/3)/MW(25); % LIGO
 m0(23,:) = (0.3812/3)/MW(23); % LIGC
 m0(38,:) = 0.111/MW(38); % TGL
-m0(37,:) = 0.0354/MW(37); % CTANN
+m0(37,:) = 0.0354/MW(37); % TANN
 m0(39,:) = 0.80/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
@@ -72,7 +72,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 26000; % input heat flux [w/m2]
+qs = 45000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -84,8 +84,8 @@ dt = .1;
 nstep = 200; 
 time = 0;
 t = zeros(nstep+1,1); 
-yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix
-yy1 = zeros(nstep+1,length(y10)); % heat equation solution matrix
+yy = zeros(nstep+1,length(y0)); % heat equation solution matrix (?)
+yy1 = zeros(nstep+1,length(y10)); % species and energy transport solution matrix
 
 t(1) = 0;
 yy(1,:) = y0;
@@ -118,7 +118,7 @@ end
 
 %% plotting and related operations
 
-dimensionless_rho = yy(:,end)/yy(1,end);
+dimensionless_rho = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
 
 % figure(1); clf
 % hold on;
