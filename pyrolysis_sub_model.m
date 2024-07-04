@@ -81,7 +81,7 @@ rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
 % input radiative heat flux (W/m2)
-qs = 40000; 
+qs = 45000; 
 
 
 %%% variable initialization  %%%%%%%%%%%%%
@@ -143,16 +143,16 @@ global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux re
     k = zeros(length(afac),Mesh.Jnodes); % reaction rate coefficient
     m = zeros(nsp,Mesh.Jnodes); % mass
     phi = zeros(Mesh.Jnodes,1); % porosity
-    kb = zeros(Mesh.Jnodes,1); % %thermal conductivity 
+    kb = zeros(Mesh.Jnodes,1); % thermal conductivity 
     e = zeros(Mesh.Jnodes,1); % emissivity
     rhos = zeros(Mesh.Jnodes,1); 
     drhosdt = zeros(Mesh.Jnodes,1); 
     mprime = zeros(nsp,Mesh.Jnodes);
     p = zeros(Mesh.Jnodes,1); % non-staggered pressure points
-    flux = zeros(Mesh.Jnodes,1); %flux based on staggered vertical velocity points
+    flux = zeros(Mesh.Jnodes,1); % flux based on staggered vertical velocity points
     yj = zeros(gsp,Mesh.Jnodes); % gas-phase species mass fraction
     j = zeros(gsp,Mesh.Jnodes); % diffusive flux
-    D3 = zeros(Mesh.Jnodes,1); %  diffusivity
+    D3 = zeros(Mesh.Jnodes,1); % diffusivity
     rhogphi = zeros(Mesh.Jnodes,1);
     drgpydt = zeros(gsp,Mesh.Jnodes);
     drhogphidt = zeros(Mesh.Jnodes,1);
