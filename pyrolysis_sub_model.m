@@ -81,7 +81,7 @@ rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
 % input radiative heat flux (W/m2)
-qs = 26000; 
+qs = 40000; 
 
 
 %%% variable initialization  %%%%%%%%%%%%%
