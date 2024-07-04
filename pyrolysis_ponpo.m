@@ -72,7 +72,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 40000; % input heat flux [w/m2]
+qs = 26000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -81,7 +81,7 @@ Kd = 1e-10; % porous fuel permeability
 %% ode solver options
 
 dt = .1;
-nstep = 1020; % course mesh during testing
+nstep = 200; 
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix
