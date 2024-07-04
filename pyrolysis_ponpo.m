@@ -1,5 +1,7 @@
 %% 1D pyrolysis solver by DBehnoudfar edited by Michelle Gee
 
+tic; %start timer 
+
 global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp tempflux p0 Kd yj0
 
 %% load species data and kinetics parameters
@@ -18,9 +20,9 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size
-sample_height = 3.8e-2; % [m]
+sample_height = 0.399e-2; % [m]
 Mesh.dz = sample_height/(Mesh.Jnodes);
-Mesh.a = 1e-2^2; % surface area, [m-2]
+Mesh.a = (sample_height)^2; % surface area, [m-2]
 Mesh.dv = Mesh.a * Mesh.dz;
 
 %% initialize variables
@@ -39,18 +41,18 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 %% set initial composition and conditions
 
 % define # moles at each node (column) for corresp. species (row)
-m0(1,:) = 0.4254/MW(1); % CELL 
-m0(17,:) = 0.1927/MW(17); % HCE
-m0(24,:) = 0.0998/MW(24); % LIGH
-m0(25,:) = 0.0482/MW(25); % LIGO
-m0(23,:) = 0.1658/MW(23); % LIGC
-m0(38,:) = 0.0326/MW(38); % TGL
+m0(1,:) = 0.0917/MW(1); % CELL 
+m0(17,:) = 0.332/MW(17); % HCE
+m0(24,:) = (0.3812/3)/MW(24); % LIGH
+m0(25,:) = (0.3812/3)/MW(25); % LIGO
+m0(23,:) = (0.3812/3)/MW(23); % LIGC
+m0(38,:) = 0.111/MW(38); % TGL
 m0(37,:) = 0.0354/MW(37); % CTANN
-m0(39,:) = 0.05/MW(39); % moisture
+m0(39,:) = 0.80/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
-sample_density = 380;
+sample_density = 657; % [kg/m3]
 rhos_mass0 = rhos_mass0+sample_density;
 sample_mass = Mesh.a*sample_height*rhos_mass0(1); 
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
@@ -79,7 +81,7 @@ Kd = 1e-10; % porous fuel permeability
 %% ode solver options
 
 dt = .1;
-nstep = 20; % course mesh during testing
+nstep = 1020; % course mesh during testing
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % species transport equation solution matrix
@@ -92,7 +94,7 @@ ye = zeros(length(t),length(g_index));
 j0 = zeros(length(t),1);
 Ts = zeros(length(t),1); Ts(1) = 300;
 
-options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5, 'BDF',0, 'MaxOrder',1);
+options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5);%, 'BDF',0, 'MaxOrder',1);
 
 %% time integration 
 
@@ -118,12 +120,12 @@ end
 
 dimensionless_rho = yy(:,end)/yy(1,end);
 
-figure(1); clf
-hold on;
-plot(t, dimensionless_rho);
-xlabel('time [s]');
-ylabel('density ratio');
-title('initial / final density over time');
+% figure(1); clf
+% hold on;
+% plot(t, dimensionless_rho);
+% xlabel('time [s]');
+% ylabel('density ratio');
+% title('initial / final density over time');
 
 % figure(2); clf
 % plot(T, yy(:,end));
@@ -133,14 +135,14 @@ title('initial / final density over time');
 % ylabel('mass %');
 % title('mass % evolution wrt T');
 
-figure(3); clf
-plot(T, -mlr);
-xlabel('Temperature [K]');
-ylabel('mlr, DTG');
-title('Mass loss rate (mlr, DTG) wrt T');
-hold off;
+% figure(3); clf
+% plot(Ts, -mlr);
+% xlabel('Temperature [K]');
+% ylabel('mlr, DTG');
+% title('Mass loss rate (mlr, DTG) wrt T');
+% hold off;
 
-
+toc; % end timer
 %% define functions 
 
 % ODE function for species transport equation
