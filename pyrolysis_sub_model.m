@@ -15,7 +15,7 @@
 % , gas_rho*g*phi*y_gas_species2_cell_1, ..., gas_rho*g*phi*y_gas_speciesM_cell_1, ...
 % , gas_rho*g*phi*y_gas_species1_cell_2, ... , gas_rho*g*phi*y_gas_speciesM_cell_N]
 
-tic; %start timer
+tic; % start timer
 
 % load reaction rates parameters 
 load('solid_kinetics_data_v1.mat');
@@ -81,12 +81,12 @@ rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
 % input radiative heat flux (W/m2)
-qs = 45000; 
+qs = 60000; 
 
 
 %%% variable initialization  %%%%%%%%%%%%%
 
-dt =.1; % time step size
+dt = .1; % time step size
 nstep = 200; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
@@ -129,7 +129,9 @@ for i=1:nstep
     t(i+1) = t(i) + dt;
 end
 
-% save pyrolysis_data.mat yy ye j0 Ts yy1
+dim_rho_ox = yy1(:,end)/yy1(1,end);
+
+save pyrolysis_w_ox_data60k.mat yy Ts yy1 dim_rho_ox % ye j0
  
 toc; % end timer
 
