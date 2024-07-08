@@ -20,7 +20,7 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 %% setup mesh 
 
 Mesh.Jnodes = 3; % mesh size
-sample_height = 0.399166667e-3; % Cvfol <-, 0.372273e-3; % <- AT fol, MA fol -> 0.289167e-3; % [m]
+sample_height =  3.891e-3; % <- ma 1hr, 2.360e-3; % <- AT 1hr, 2.244e-3; % <- CV 1hr, 0.399166667e-3; % <- Cvfol, % 0.289167e-3; % <- MA fol [m], ; 0.372273e-3; % <- AT fol, 
 Mesh.dz = sample_height/(Mesh.Jnodes);
 Mesh.a = (sample_height)^2; % surface area, [m-2]
 Mesh.dv = Mesh.a * Mesh.dz;
@@ -42,34 +42,64 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 
 % define # moles at each node (column) for corresp. species (row)
 % ma fol
-% m0(1,:) = 0.1649/MW(1); % CELL 
-% m0(17,:) = 0.0919/MW(17); % HCE
-% m0(24,:) = (0.3121/3)/MW(24); % LIGH
-% m0(25,:) = (0.3121/3)/MW(25); % LIGO
-% m0(23,:) = (0.3121/3)/MW(23); % LIGC
+% m0(1,:) = (0.1649+((1/2)*(0.1269)))/MW(1); % CELL 
+% m0(17,:) = (0.0919+((1/2)*(0.1269)))/MW(17); % HCE
+% m0(24,:) = (0.1127/3)/MW(24); % LIGH
+% m0(25,:) = (0.1127/3)/MW(25); % LIGO
+% m0(23,:) = (0.1127/3)/MW(23); % LIGC
 % m0(38,:) = 0.0381/MW(38); % TGL
 % m0(37,:) = 0.0354/MW(37); % TANN
-% m0(39,:) = 0.82/MW(39); % moisture
+% m0(39,:) = 1.219/MW(39); % moisture
+
+% ma 1hr
+m0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
+m0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
+m0(24,:) = (0.1083/3)/MW(24); % LIGH
+m0(25,:) = (0.1083/3)/MW(25); % LIGO
+m0(23,:) = (0.1083/3)/MW(23); % LIGC
+m0(38,:) = 0.0557/MW(38); % TGL
+m0(37,:) = 0.0354/MW(37); % TANN
+m0(39,:) = 0.86/MW(39); % moisture
 
 % AT fol
-% m0(1,:) = 0.16241/MW(1); % CELL 
-% m0(17,:) = 0.052/MW(17); % HCE
-% m0(24,:) = (0.22/3)/MW(24); % LIGH
-% m0(25,:) = (0.22/3)/MW(25); % LIGO
-% m0(23,:) = (0.22/3)/MW(23); % LIGC
+% m0(1,:) = (0.16241+((1/2)*0.048))/MW(1); % CELL 
+% m0(17,:) = (0.052+((1/2)*0.048))/MW(17); % HCE
+% m0(24,:) = (0.05599/3)/MW(24); % LIGH
+% m0(25,:) = (0.05599/3)/MW(25); % LIGO
+% m0(23,:) = (0.05599/3)/MW(23); % LIGC
 % m0(38,:) = 0.0766/MW(38); % TGL
 % m0(37,:) = 0.0354/MW(37); % TANN
 % m0(39,:) = 1.52/MW(39); % moisture
 
+% AT 1hr
+% m0(1,:) = (0.3082+((1/2)*0.0316))/MW(1); % CELL 
+% m0(17,:) = (0.1427+((1/2)*0.0316))/MW(17); % HCE
+% m0(24,:) = (0.1242/3)/MW(24); % LIGH
+% m0(25,:) = (0.1242/3)/MW(25); % LIGO
+% m0(23,:) = (0.1242/3)/MW(23); % LIGC
+% m0(38,:) = 0.0216/MW(38); % TGL
+% m0(37,:) = 0.0354/MW(37); % TANN
+% m0(39,:) = 1.25/MW(39); % moisture
+
 % CV fol
-m0(1,:) = 0.0917/MW(1); % CELL 
-m0(17,:) = 0.0028/MW(17); % HCE
-m0(24,:) = (0.3812/3)/MW(24); % LIGH
-m0(25,:) = (0.3812/3)/MW(25); % LIGO
-m0(23,:) = (0.3812/3)/MW(23); % LIGC
-m0(38,:) = 0.111/MW(38); % TGL
-m0(37,:) = 0.0354/MW(37); % TANN
-m0(39,:) = 1.00/MW(39); % moisture
+% m0(1,:) = (0.0917+((1/2)*0.3292))/MW(1); % CELL 
+% m0(17,:) = (0.0028+((1/2)*0.3292))/MW(17); % HCE
+% m0(24,:) = (0.0499/3)/MW(24); % LIGH
+% m0(25,:) = (0.0499/3)/MW(25); % LIGO
+% m0(23,:) = (0.0499/3)/MW(23); % LIGC
+% m0(38,:) = 0.111/MW(38); % TGL
+% m0(37,:) = 0.0354/MW(37); % TANN
+% m0(39,:) = 1.06/MW(39); % moisture
+
+% CV 1hr
+% m0(1,:) = (0.3198+((1/2)*0.1912))/MW(1); % CELL 
+% m0(17,:) = (0.1095+((1/2)*0.1912))/MW(17); % HCE
+% m0(24,:) = (0.1356/3)/MW(24); % LIGH
+% m0(25,:) = (0.1356/3)/MW(25); % LIGO
+% m0(23,:) = (0.1356/3)/MW(23); % LIGC
+% m0(38,:) = 0.0171/MW(38); % TGL
+% m0(37,:) = 0.0354/MW(37); % TANN
+% m0(39,:) = 1.605/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
@@ -93,7 +123,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 60000; % input heat flux [w/m2]
+qs = 40000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -102,7 +132,7 @@ Kd = 1e-10; % porous fuel permeability
 %% ode solver options
 
 dt = .1;
-nstep = 200; 
+nstep = 1020; 
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % heat equation solution matrix (?)
@@ -139,7 +169,9 @@ end
 
 %% plotting and related operations
 
-dim_rho_cvfol = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
+% dim_rho_at1hr = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
+% dim_rho_cv1hr = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
+dim_rho_ma1hr = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
 
 % figure(1); clf
 % hold on;
@@ -163,8 +195,7 @@ dim_rho_cvfol = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
 % title('Mass loss rate (mlr, DTG) wrt T');
 % hold off;
 
-save pyrolysis_data_cvfol_60k.mat Ts yy1 dim_rho_cvfol t % ye j0
-
+%save pyrolysis_data_at1hr_40k.mat Ts yy1 dim_rho_at1hr t % ye j0
 
 toc; % end timer
 %% define functions 
