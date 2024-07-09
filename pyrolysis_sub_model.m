@@ -18,13 +18,13 @@
 tic; % start timer
 
 % load reaction rates parameters 
-load('solid_kinetics_data_v1.mat');
+load('solid_kinetics_data_v2.mat');
 
 
 % mesh set-up
 
 Mesh.Jnodes = 3; % number of cells
-sample_height = 0.399e-3;
+sample_height = 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 3.891e-3; % <- ma 1hr, 0.399166667e-3; % <- Cvfol, % [m], ; 0.372273e-3; % <- AT fol, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2;
 %Mesh.a = 3.8e-2^2; % cross-sectional area of each cell 
@@ -48,18 +48,69 @@ T0 = zeros(Mesh.Jnodes,1) + 300;  % temperature [K]
 mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 
 % initial mass fractions 
-mass0(1,:)  = 0.0917;  % CELL
-mass0(17,:) = 0.332; % HCE
-mass0(24,:) = (0.3812/3); % LIGH
-mass0(25,:) = (0.3812/3); % LIGO
-mass0(23,:) = (0.3812/3); % LIGC
-mass0(38,:) = 0.111; % TGL
-mass0(37,:) = 0.0354; % TANN
-mass0(39,:) = 0.80;   % moisture
 
-initial_density = 657; % solid, [kg/m3]
-rhos0 = zeros(Mesh.Jnodes,1) + initial_density*(1+mass0(39,1));
-% rhos0 = zeros(Mesh.Jnodes,1) + 380*(1+mass0(39,1)); % initial solid density (Kg/m3)
+% ma fol
+% mass0(1,:) = (0.1649+((1/2)*(0.1269)))/MW(1); % CELL 
+% mass0(17,:) = (0.0919+((1/2)*(0.1269)))/MW(17); % HCE
+% mass0(24,:) = (0.1127/3)/MW(24); % LIGH
+% mass0(25,:) = (0.1127/3)/MW(25); % LIGO
+% mass0(23,:) = (0.1127/3)/MW(23); % LIGC
+% mass0(38,:) = 0.0381/MW(38); % TGL
+% mass0(37,:) = 0.0354/MW(37); % TANN
+% mass0(39,:) = 1.219/MW(39); % moisture
+
+% ma 1hr
+% mass0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
+% mass0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
+% mass0(24,:) = (0.1083/3)/MW(24); % LIGH
+% mass0(25,:) = (0.1083/3)/MW(25); % LIGO
+% mass0(23,:) = (0.1083/3)/MW(23); % LIGC
+% mass0(38,:) = 0.0557/MW(38); % TGL
+% mass0(37,:) = 0.0354/MW(37); % TANN
+% mass0(39,:) = 0.86/MW(39); % moisture
+
+% AT fol
+% mass0(1,:) = (0.16241+((1/2)*0.048))/MW(1); % CELL 
+% mass0(17,:) = (0.052+((1/2)*0.048))/MW(17); % HCE
+% mass0(24,:) = (0.05599/3)/MW(24); % LIGH
+% mass0(25,:) = (0.05599/3)/MW(25); % LIGO
+% mass0(23,:) = (0.05599/3)/MW(23); % LIGC
+% mass0(38,:) = 0.0766/MW(38); % TGL
+% mass0(37,:) = 0.0354/MW(37); % TANN
+% mass0(39,:) = 1.52/MW(39); % moisture
+
+% AT 1hr
+% mass0(1,:) = (0.3082+((1/2)*0.0316))/MW(1); % CELL 
+% mass0(17,:) = (0.1427+((1/2)*0.0316))/MW(17); % HCE
+% mass0(24,:) = (0.1242/3)/MW(24); % LIGH
+% mass0(25,:) = (0.1242/3)/MW(25); % LIGO
+% mass0(23,:) = (0.1242/3)/MW(23); % LIGC
+% mass0(38,:) = 0.0216/MW(38); % TGL
+% mass0(37,:) = 0.0354/MW(37); % TANN
+% mass0(39,:) = 1.25/MW(39); % moisture
+
+% CV fol
+% mass0(1,:) = (0.0917+((1/2)*0.3292))/MW(1); % CELL 
+% mass0(17,:) = (0.0028+((1/2)*0.3292))/MW(17); % HCE
+% mass0(24,:) = (0.0499/3)/MW(24); % LIGH
+% mass0(25,:) = (0.0499/3)/MW(25); % LIGO
+% mass0(23,:) = (0.0499/3)/MW(23); % LIGC
+% mass0(38,:) = 0.111/MW(38); % TGL
+% mass0(37,:) = 0.0354/MW(37); % TANN
+% mass0(39,:) = 1.06/MW(39); % moisture
+
+% CV 1hr
+mass0(1,:) = (0.3198+((1/2)*0.1912))/MW(1); % CELL 
+mass0(17,:) = (0.1095+((1/2)*0.1912))/MW(17); % HCE
+mass0(24,:) = (0.1356/3)/MW(24); % LIGH
+mass0(25,:) = (0.1356/3)/MW(25); % LIGO
+mass0(23,:) = (0.1356/3)/MW(23); % LIGC
+mass0(38,:) = 0.0171/MW(38); % TGL
+mass0(37,:) = 0.0354/MW(37); % TANN
+mass0(39,:) = 1.605/MW(39); % moisture
+
+initial_density = 915; % solid, [kg/m3]
+rhos0 = zeros(Mesh.Jnodes,1) + initial_density*(1+mass0(39,1)); % initial solid density [kg/m3]
 sample_mass = Mesh.a*sample_height*rhos0(1);
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
 y10 = [mass0(:); T0(:); rhos0(:)]; % initial solution vector y1
@@ -81,13 +132,13 @@ rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
 % input radiative heat flux (W/m2)
-qs = 60000; 
+qs = 40000; 
 
 
 %%% variable initialization  %%%%%%%%%%%%%
 
 dt = .1; % time step size
-nstep = 200; % number of time steps
+nstep = 1020; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -129,9 +180,9 @@ for i=1:nstep
     t(i+1) = t(i) + dt;
 end
 
-dim_rho_ox = yy1(:,end)/yy1(1,end);
+dimrho_ox_cv1hr_40k = yy1(:,end)/yy1(1,end);
 
-save pyrolysis_w_ox_data60k.mat yy Ts yy1 dim_rho_ox % ye j0
+save ox_datacv1hr_40k.mat yy Ts yy1 dimrho_ox_cv1hr_40k % ye j0
  
 toc; % end timer
 
