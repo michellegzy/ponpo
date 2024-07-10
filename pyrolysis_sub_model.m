@@ -23,7 +23,7 @@ load('solid_kinetics_data_v3.mat');
 
 % mesh set-up
 
-Mesh.Jnodes = 5; % number of cells
+Mesh.Jnodes = 3; % number of cells
 sample_height = 3.8e-2; % <- white pine, 3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2;
@@ -148,7 +148,7 @@ qs = 40000;
 %%% variable initialization  %%%%%%%%%%%%%
 
 dt = .1; % time step size
-nstep = 1200; % number of time steps
+nstep = 4800; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
