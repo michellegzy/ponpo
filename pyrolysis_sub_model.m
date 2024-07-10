@@ -18,13 +18,13 @@
 tic; % start timer
 
 % load reaction rates parameters 
-load('solid_kinetics_data_v2.mat');
+load('solid_kinetics_data_v3.mat');
 
 
 % mesh set-up
 
-Mesh.Jnodes = 3; % number of cells
-sample_height =  3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
+Mesh.Jnodes = 5; % number of cells
+sample_height = 3.8e-2; % <- white pine, 3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2;
 %Mesh.a = 3.8e-2^2; % cross-sectional area of each cell 
@@ -38,7 +38,7 @@ Mesh.dv = Mesh.a * Mesh.dz;
 % 's_index' stores the indices of solid-phase species
 % MW stores moecular weight of species (Kg/mol)
 
-global qs g_index s_index MW gsp nsp p0 yj0 tempflux R reactants reactions afac nfac ea reaction_order % ycoeff 
+global qs g_index s_index s_density MW gsp nsp p0 yj0 tempflux R reactants reactions afac nfac ea reaction_order % deltah 
 
 nsp = length(species);
 gsp = length(g_index);
@@ -48,6 +48,16 @@ T0 = zeros(Mesh.Jnodes,1) + 300;  % temperature [K]
 mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 
 % initial mass fractions 
+
+%white pine
+mass0(1,:) = 0.4254; % CELL
+mass0(17,:) = 0.1927; % HCE
+mass0(24,:) = 0.0998; % LIGH
+mass0(25,:) = 0.0482; % LIGO
+mass0(23,:) = 0.1658; % LIGC
+mass0(38,:) = 0.0326; % TGL
+mass0(37,:) = 0.0354; % TANN
+mass0(39,:) = 0.05; % moisture
 
 % ma fol
 % mass0(1,:) = (0.1649+((1/2)*(0.1269)))/MW(1); % CELL 
@@ -60,14 +70,14 @@ mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 % mass0(39,:) = 1.219/MW(39); % moisture
 
 % ma 1hr
-mass0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
-mass0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
-mass0(24,:) = (0.1083/3)/MW(24); % LIGH
-mass0(25,:) = (0.1083/3)/MW(25); % LIGO
-mass0(23,:) = (0.1083/3)/MW(23); % LIGC
-mass0(38,:) = 0.0557/MW(38); % TGL
-mass0(37,:) = 0.0354/MW(37); % TANN
-mass0(39,:) = 0.86/MW(39); % moisture
+% mass0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
+% mass0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
+% mass0(24,:) = (0.1083/3)/MW(24); % LIGH
+% mass0(25,:) = (0.1083/3)/MW(25); % LIGO
+% mass0(23,:) = (0.1083/3)/MW(23); % LIGC
+% mass0(38,:) = 0.0557/MW(38); % TGL
+% mass0(37,:) = 0.0354/MW(37); % TANN
+% mass0(39,:) = 0.86/MW(39); % moisture
 
 % AT fol
 % mass0(1,:) = (0.16241+((1/2)*0.048))/MW(1); % CELL 
@@ -109,7 +119,7 @@ mass0(39,:) = 0.86/MW(39); % moisture
 % mass0(37,:) = 0.0354/MW(37); % TANN
 % mass0(39,:) = 1.605/MW(39); % moisture
 
-initial_density = 915; % solid, [kg/m3]
+initial_density = 380; % solid, [kg/m3]
 rhos0 = zeros(Mesh.Jnodes,1) + initial_density*(1+mass0(39,1)); % initial solid density [kg/m3]
 sample_mass = Mesh.a*sample_height*rhos0(1);
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
@@ -132,7 +142,7 @@ rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
 % input radiative heat flux (W/m2)
-qs = 45000; 
+qs = 40000; 
 
 
 %%% variable initialization  %%%%%%%%%%%%%
@@ -387,11 +397,11 @@ end
 % function defining heat conductivity [W/m/K]
 function kb = kba(T,yi,phi,rho_s_mass)
     
-    global s_index MW % s_density_new
+    global s_index MW % s_density % s_density_new
     k = zeros(length(s_index),1)+.17*(T/300)^.594;
     k(19)=.6;
     k(3)=.065*(T/300)^.435+5.670374419e-8*3.3e-3*(T)^3;
-   
+    % s_density.*MW(s_index)*1000; 
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
 	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29].*MW(s_index)*1000; 
     % s_density = s_density1'.*MW(s_index)*1000;
@@ -403,11 +413,11 @@ end
 
 % function defining emissivity 
 function e = epsilon(yi,rho_s_mass,phi)
-    global s_index MW % s_density_new
+    global s_index MW % s_density % s_density_new
     e = zeros(length(s_index),1)+0.757;
     e(3)=0.957; % char
     e(19)=.95; % H2O
-
+    % s_density.*MW(s_index)*1000;
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;5;1.67;...
         55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29].*MW(s_index)*1000; 
     yi(18:end)=0;
@@ -429,11 +439,11 @@ end
 % function defining heat of reactions [J/kg of reactant]
 function q_srxns = q_srxns(T)
 
-    global MW reactants % reactions
-    
+    global MW reactants % deltah % reactions
+    % deltah*4.184; % convert from kcal to kj
     deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000;...
 	-10300; 30700; 26000; -31100; -26100; 46200; -21100; -83600; 1300; 1300;...
-	10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 18219397.71;-8945388.19;-3758019.524]*4.184;
+	10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 26310.78; -92919.7; -25025.75]*4.184;
     q_srxns = deltah./MW(reactants(:,1));
     q_srxns(28) = -2.41e6;
 end
@@ -441,11 +451,11 @@ end
 % function defining porosity 
 function phi = phii(yi,rho_s_mass)
     
-    global MW s_index % s_density_new
-    
+    global MW s_index % s_density % s_density_new
+    % s_density*1000;
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
 	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29]*1000;
     yi(18:end)=0;
-    phi = 1-sum(yi./(s_density.*MW(s_index)))*rho_s_mass;
+    phi = 1-sum(yi./(s_density.*(MW(s_index))))*rho_s_mass;
     % phi = 1-sum(yi./(s_density_new)')*rho_s_mass;
 end
