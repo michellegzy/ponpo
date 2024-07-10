@@ -123,7 +123,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 40000; % input heat flux [w/m2]
+qs = 45000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -132,7 +132,7 @@ Kd = 1e-10; % porous fuel permeability
 %% ode solver options
 
 dt = .1;
-nstep = 1020; 
+nstep = 1200; 
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % heat equation solution matrix (?)
@@ -171,7 +171,7 @@ end
 
 % dim_rho_at1hr = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
 % dim_rho_cv1hr = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
-dim_rho_ma1hr = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
+% dim_rho_ma1hr = yy1(:,end)/yy1(1,end); %FIXED- yy1 is species matrix.
 
 % figure(1); clf
 % hold on;
