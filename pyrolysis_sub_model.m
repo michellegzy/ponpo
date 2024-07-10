@@ -24,7 +24,7 @@ load('solid_kinetics_data_v2.mat');
 % mesh set-up
 
 Mesh.Jnodes = 3; % number of cells
-sample_height =  0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 3.891e-3; % <- ma 1hr, % [m]
+sample_height =  3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2;
 %Mesh.a = 3.8e-2^2; % cross-sectional area of each cell 
@@ -60,24 +60,24 @@ mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 % mass0(39,:) = 1.219/MW(39); % moisture
 
 % ma 1hr
-% mass0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
-% mass0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
-% mass0(24,:) = (0.1083/3)/MW(24); % LIGH
-% mass0(25,:) = (0.1083/3)/MW(25); % LIGO
-% mass0(23,:) = (0.1083/3)/MW(23); % LIGC
-% mass0(38,:) = 0.0557/MW(38); % TGL
-% mass0(37,:) = 0.0354/MW(37); % TANN
-% mass0(39,:) = 0.86/MW(39); % moisture
+mass0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
+mass0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
+mass0(24,:) = (0.1083/3)/MW(24); % LIGH
+mass0(25,:) = (0.1083/3)/MW(25); % LIGO
+mass0(23,:) = (0.1083/3)/MW(23); % LIGC
+mass0(38,:) = 0.0557/MW(38); % TGL
+mass0(37,:) = 0.0354/MW(37); % TANN
+mass0(39,:) = 0.86/MW(39); % moisture
 
 % AT fol
-mass0(1,:) = (0.16241+((1/2)*0.048))/MW(1); % CELL 
-mass0(17,:) = (0.052+((1/2)*0.048))/MW(17); % HCE
-mass0(24,:) = (0.05599/3)/MW(24); % LIGH
-mass0(25,:) = (0.05599/3)/MW(25); % LIGO
-mass0(23,:) = (0.05599/3)/MW(23); % LIGC
-mass0(38,:) = 0.0766/MW(38); % TGL
-mass0(37,:) = 0.0354/MW(37); % TANN
-mass0(39,:) = 1.52/MW(39); % moisture
+% mass0(1,:) = (0.16241+((1/2)*0.048))/MW(1); % CELL 
+% mass0(17,:) = (0.052+((1/2)*0.048))/MW(17); % HCE
+% mass0(24,:) = (0.05599/3)/MW(24); % LIGH
+% mass0(25,:) = (0.05599/3)/MW(25); % LIGO
+% mass0(23,:) = (0.05599/3)/MW(23); % LIGC
+% mass0(38,:) = 0.0766/MW(38); % TGL
+% mass0(37,:) = 0.0354/MW(37); % TANN
+% mass0(39,:) = 1.52/MW(39); % moisture
 
 % AT 1hr
 % mass0(1,:) = (0.3082+((1/2)*0.0316))/MW(1); % CELL 
@@ -132,13 +132,13 @@ rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
 % input radiative heat flux (W/m2)
-qs = 60000; 
+qs = 45000; 
 
 
 %%% variable initialization  %%%%%%%%%%%%%
 
 dt = .1; % time step size
-nstep = 200; % number of time steps
+nstep = 1200; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -180,9 +180,9 @@ for i=1:nstep
     t(i+1) = t(i) + dt;
 end
 
-dimrho_ox_atfol_60k = yy1(:,end)/yy1(1,end);
+dimrho_ox_at1hr_45k = yy1(:,end)/yy1(1,end);
 
-save ox_dataatfol_60k.mat yy Ts yy1 dimrho_ox_atfol_60k % ye j0
+%save ox_dataatfol_60k.mat yy Ts yy1 dimrho_ox_atfol_60k % ye j0
  
 toc; % end timer
 
