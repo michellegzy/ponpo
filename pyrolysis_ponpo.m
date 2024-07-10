@@ -19,8 +19,8 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 
 %% setup mesh 
 
-Mesh.Jnodes = 3; % mesh size
-sample_height =  3.891e-3; % <- ma 1hr, 2.360e-3; % <- AT 1hr, 2.244e-3; % <- CV 1hr, 0.399166667e-3; % <- Cvfol, % 0.289167e-3; % <- MA fol [m], ; 0.372273e-3; % <- AT fol, 
+Mesh.Jnodes = 10; % mesh size
+sample_height =  3.8e-2; % white pine, 3.891e-3; % <- ma 1hr, 2.360e-3; % <- AT 1hr, 2.244e-3; % <- CV 1hr, 0.399166667e-3; % <- Cvfol, % 0.289167e-3; % <- MA fol [m], ; 0.372273e-3; % <- AT fol, 
 Mesh.dz = sample_height/(Mesh.Jnodes);
 Mesh.a = (sample_height)^2; % surface area, [m-2]
 Mesh.dv = Mesh.a * Mesh.dz;
@@ -41,6 +41,17 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 %% set initial composition and conditions
 
 % define # moles at each node (column) for corresp. species (row)
+
+%white pine
+m0(1,:) = 0.4254; % CELL
+m0(17,:) = 0.1927; % HCE
+m0(24,:) = 0.0998; % LIGH
+m0(25,:) = 0.0482; % LIGO
+m0(23,:) = 0.1658; % LIGC
+m0(38,:) = 0.0326; %TGL
+m0(37,:) = 0.0354; %CTANN
+m0(39,:) = 0.05; %moisture
+
 % ma fol
 % m0(1,:) = (0.1649+((1/2)*(0.1269)))/MW(1); % CELL 
 % m0(17,:) = (0.0919+((1/2)*(0.1269)))/MW(17); % HCE
@@ -52,14 +63,14 @@ m0 = zeros(47,Mesh.Jnodes); % mole storage matrix
 % m0(39,:) = 1.219/MW(39); % moisture
 
 % ma 1hr
-m0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
-m0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
-m0(24,:) = (0.1083/3)/MW(24); % LIGH
-m0(25,:) = (0.1083/3)/MW(25); % LIGO
-m0(23,:) = (0.1083/3)/MW(23); % LIGC
-m0(38,:) = 0.0557/MW(38); % TGL
-m0(37,:) = 0.0354/MW(37); % TANN
-m0(39,:) = 0.86/MW(39); % moisture
+% m0(1,:) = (0.4161+((1/2)*(0.0295)))/MW(1); % CELL 
+% m0(17,:) = (0.2428+((1/2)*(0.0295)))/MW(17); % HCE
+% m0(24,:) = (0.1083/3)/MW(24); % LIGH
+% m0(25,:) = (0.1083/3)/MW(25); % LIGO
+% m0(23,:) = (0.1083/3)/MW(23); % LIGC
+% m0(38,:) = 0.0557/MW(38); % TGL
+% m0(37,:) = 0.0354/MW(37); % TANN
+% m0(39,:) = 0.86/MW(39); % moisture
 
 % AT fol
 % m0(1,:) = (0.16241+((1/2)*0.048))/MW(1); % CELL 
@@ -103,7 +114,7 @@ m0(39,:) = 0.86/MW(39); % moisture
 
 mass0 = m0.*MW; % kg
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1));
-sample_density = 915; % [kg/m3]
+sample_density = 380; % [kg/m3]
 rhos_mass0 = rhos_mass0+sample_density;
 sample_mass = Mesh.a*sample_height*rhos_mass0(1); 
 mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
@@ -123,7 +134,7 @@ for i = 1:Mesh.Jnodes
 end
 rgpy0 = reshape(rgpy0,gsp*Mesh.Jnodes,1);
 
-qs = 45000; % input heat flux [w/m2]
+qs = 40000; % input heat flux [w/m2]
 y0 = [rhogphi0(:); rgpy0(:)]; 
 y10 = [mass0(:); T0(:); rhos_mass0(:)];
 phi = phii(yi0,rhos_mass0(1)); % fuel porosity
@@ -151,8 +162,8 @@ options1 = odeset('RelTol',1.e-4,'AbsTol',1e-5);%, 'BDF',0, 'MaxOrder',1);
 
 for i = 1:nstep
     tspan = [t(i) t(i)+dt];
-    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
-    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
+    [~,b] = ode113(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options1);
+    [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options1);
 
     temp = a(end,:);
     temp(temp<0) = 1e-30;
