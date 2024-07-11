@@ -19,7 +19,7 @@ MW = MW * 1e-3; % conversion from g/mol to kg/mol
 
 %% setup mesh 
 
-Mesh.Jnodes = 10; % mesh size
+Mesh.Jnodes = 3; % mesh size
 sample_height =  3.8e-2; % white pine, 3.891e-3; % <- ma 1hr, 2.360e-3; % <- AT 1hr, 2.244e-3; % <- CV 1hr, 0.399166667e-3; % <- Cvfol, % 0.289167e-3; % <- MA fol [m], ; 0.372273e-3; % <- AT fol, 
 Mesh.dz = sample_height/(Mesh.Jnodes);
 Mesh.a = (sample_height)^2; % surface area, [m-2]
@@ -143,7 +143,7 @@ Kd = 1e-10; % porous fuel permeability
 %% ode solver options
 
 dt = .1;
-nstep = 1200; 
+nstep = 4800; 
 time = 0;
 t = zeros(nstep+1,1); 
 yy = zeros(nstep+1,length(y0)); % heat equation solution matrix (?)
