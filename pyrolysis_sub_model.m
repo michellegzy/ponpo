@@ -148,7 +148,7 @@ qs = 40000;
 %%% variable initialization  %%%%%%%%%%%%%
 
 dt = .1; % time step size
-nstep = 4800; % number of time steps
+nstep = 2000; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -443,7 +443,7 @@ function q_srxns = q_srxns(T)
     % deltah*4.184; % convert from kcal to kj
     deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000;...
 	-10300; 30700; 26000; -31100; -26100; 46200; -21100; -83600; 1300; 1300;...
-	10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 26310.78; -92919.7; -25025.75]*4.184;
+	10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 24608.12; -92808.17; -25041.145]*4.184;
     q_srxns = deltah./MW(reactants(:,1));
     q_srxns(28) = -2.41e6;
 end
