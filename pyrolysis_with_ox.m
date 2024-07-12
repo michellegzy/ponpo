@@ -23,7 +23,7 @@ load('solid_kinetics_data_v3.mat');
 
 % mesh set-up
 
-Mesh.Jnodes = 3; % number of cells
+Mesh.Jnodes = 10; % number of cells
 sample_height = 3.8e-2; % <- white pine, 3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2;
@@ -49,7 +49,7 @@ mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 
 % initial mass fractions 
 
-%white pine
+% white pine
 mass0(1,:) = 0.4254; % CELL
 mass0(17,:) = 0.1927; % HCE
 mass0(24,:) = 0.0998; % LIGH
@@ -190,9 +190,9 @@ for i=1:nstep
     t(i+1) = t(i) + dt;
 end
 
-dimrho_ox_at1hr_45k = yy1(:,end)/yy1(1,end);
+dimrho_ox = yy1(:,end)/yy1(1,end);
 
-%save ox_dataatfol_60k.mat yy Ts yy1 dimrho_ox_atfol_60k % ye j0
+% save ox_dataatfol_60k.mat yy Ts yy1 dimrho_ox ye j0
  
 toc; % end timer
 
