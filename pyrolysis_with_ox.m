@@ -1,4 +1,4 @@
-%%% 1D pyrolysis model
+%% 1D pyrolysis model %%
 
 % solves the two ODE system with the functions: 
 % y1' = f1(t,y1)    -- equations 1 & 2 in methods
@@ -20,17 +20,15 @@ tic; % start timer
 % load reaction rates parameters 
 load('solid_kinetics_data_v3.mat');
 
+%% mesh set-up %%
 
-% mesh set-up
-
-Mesh.Jnodes = 60; % number of cells
+Mesh.Jnodes = 3; % number of cells
 sample_height = 3.8e-2; % <- white pine, 3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
-Mesh.a = (sample_height)^2;
-%Mesh.a = 3.8e-2^2; % cross-sectional area of each cell 
+Mesh.a = (sample_height)^2; % cross-sectional area of each cell
 Mesh.dv = Mesh.a * Mesh.dz;
 
-%%%% initial conditions  %%%%%%%%%%%%
+%% initial conditions  %%
 
 % 'nsp' is total number of species
 % 'gsp' is number of gas-phase species
@@ -43,8 +41,8 @@ global qs g_index s_index s_density MW gsp nsp p0 yj0 tempflux R reactants react
 nsp = length(species);
 gsp = length(g_index);
 
-
-T0 = zeros(Mesh.Jnodes,1) + 300;  % temperature [K]
+T_initial = 300; % initial temperature [K]
+T0 = zeros(Mesh.Jnodes,1) + T_initial;  
 mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 
 % initial mass fractions 
@@ -126,7 +124,6 @@ mass0 = mass0./sum(mass0(s_index,1))*sample_mass./Mesh.Jnodes;
 y10 = [mass0(:); T0(:); rhos0(:)]; % initial solution vector y1
 yi0 = mass0(s_index,1)./sum(mass0(s_index,1)); % initial solid mass fraction
 
-
 p0 = 1.013e5; %initial pressure (Pa)
 yj0 = zeros(gsp,1);  % initial gas mass fraction
 % yj0(end) = 1;  % only N2 present
@@ -135,17 +132,16 @@ yj0 = zeros(gsp,1);  % initial gas mass fraction
 yj0(end-1) = 0.21; % O2, gas-phase species mass fraction
 yj0(end) = 0.79; % N2
 M = 1/sum(yj0./MW(g_index)); % average MW
-R = 8.314; % gas constant
+R = 8.314; % gas constant [J/molK]
 rhog0 = zeros(Mesh.Jnodes,1) + (p0)*M/(R*T0(1)); % initial gas density (Kg/m3)
 rhogphi0 = rhog0*phii(yi0,rhos0(1)); % gas_rho*g*phi
-rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; %gas_rho*g*phi*y_gas_species
+rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; % gas_rho*g*phi*y_gas_species
 y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 
-% input radiative heat flux (W/m2)
+% input radiative heat flux [W/m2]
 qs = 40000; 
 
-
-%%% variable initialization  %%%%%%%%%%%%%
+%% variable initialization  %%
 
 dt = .1; % time step size
 nstep = 2000; % number of time steps
@@ -165,17 +161,16 @@ yy1(1,:) = y10;
 ye = zeros(length(t),length(g_index)); % mass fraction of gaseous species at top surface
 j0 = zeros(length(t),1); % mass flux of gaseous products at top surface
 Ts = zeros(length(t),1); % temperature at top surface
-Ts(1) = 300;
+Ts(1) = T_initial;
 
 options = odeset('RelTol',1.e-4,'AbsTol',1e-5);
 
-
-%%%% time integration %%%%%%%%%%%%%
+%% time integration %%
 
 for i=1:nstep
     tspan = [t(i) t(i)+dt];
-    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options); % equation 1
-    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options); % equation 2
+    [~,b] = ode113(@(t,y)yprime1(time,y,Mesh),tspan,yy1(i,:),options); % equation 1
+    [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options); % equation 2
 	
 	% this step ensures the mass fraction values are non-negative
     temp = a(end,:);
@@ -198,15 +193,17 @@ for i=1:nstep
         mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
 end
 
-save ox_data_whitepine_40k.mat yy Ts yy1 dimrho_ox ye j0
+save ox_data_whitepine_40k_713.mat yy Ts yy1 dimrho_ox ye j0
  
 toc; % end timer
 
-% ODE function y2'
+%% define functions %%
+
+% ODE function y2' (species transport)
 
 function [dydt] = yprime(t,yy,Mesh,yy1)
 
-global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux reactions reactants % reaction_order ycoeff
+global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux reactions reactants R 
 
     wdot_mass = zeros(nsp,Mesh.Jnodes); % species mass production rate
     k = zeros(length(afac),Mesh.Jnodes); % reaction rate coefficient
@@ -240,7 +237,6 @@ global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux re
         yj(i,:)=rgpy(i,:)./transpose(rhogphi(:));
     end
     
-    R = 8.314; % gas constant
 	Kd = 1e-10; % porous solid permeability
     
     for i=1:Mesh.Jnodes
@@ -264,7 +260,6 @@ global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux re
         D3(i) = .018829*sqrt(abs(T(i)^3*(1/32+1/28))/((p(i)+p0)*5.061^2*.93));
 
     end 
-    
      
      for i=1:Mesh.Jnodes-1
          
@@ -286,8 +281,9 @@ global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux re
         flux(Mesh.Jnodes)=0;
     end
 	
-	yja = zeros(gsp,1); % surrounding gas mass fraction 
-    yja(end)= 1; % only N2 present
+	yja = zeros(gsp,1); % initialize surrounding gas mass fraction 
+    yja(end)= 0.79; % N2 mass frac for air
+    yja(end-1)= 0.21; % O2 mass frac for air
 	
     for ii=1:gsp
         j(ii,Mesh.Jnodes) = 0-.01*(yja(ii)-yj(ii,end));
@@ -323,11 +319,11 @@ global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux re
 end
 
 
-% ODE function y1'
+% ODE function y1' (energy transport) 
 
 function [dydt] = yprime1(t,yy,Mesh)
 
-global afac nfac ea reactants s_index g_index qs MW deltah nsp reactions reaction_order % ycoeff
+global afac nfac ea reactants s_index g_index qs MW deltah nsp reactions reaction_order R 
 
     wdot_mass = zeros(nsp,Mesh.Jnodes);
     k = zeros(length(afac),Mesh.Jnodes);
@@ -349,11 +345,9 @@ global afac nfac ea reactants s_index g_index qs MW deltah nsp reactions reactio
     T = yy(nsp*Mesh.Jnodes+1:(nsp+1)*Mesh.Jnodes);
     rho_s_mass(:) = yy((nsp+1)*Mesh.Jnodes+1:(nsp+2)*Mesh.Jnodes);
     
-    R = 8.314; 
     sigma = 5.670374419e-8; 
-	h =10; % heat transfer coefficient at top boundary
-	tr=0;
-    
+	h = 10; % heat transfer coefficient at top boundary [w/mk]
+	tr = 0;
     
     for i=1:Mesh.Jnodes
           
@@ -390,29 +384,25 @@ global afac nfac ea reactants s_index g_index qs MW deltah nsp reactions reactio
         +Mesh.dv*sum(abs(wdot_mass(reactants(:,1),1)).*q_srxns(T(1))))...
         /(Mesh.dv*rho_s_mass(1)*sum(d1(s_index).*yi(:,1)));
      
-     
     for i=1:Mesh.Jnodes
         drhosdt(i) = - sum(wdot_mass(g_index,i));
     end
 
-      
     dydt = [mprime(:); Tprime(:); drhosdt(:)];  
 end
 
 
-% function defining heat conductivity [W/m/K]
+% function defining heat conductivity [W/mK]
 function kb = kba(T,yi,phi,rho_s_mass)
     
     global s_index MW % s_density % s_density_new
     k = zeros(length(s_index),1)+.17*(T/300)^.594;
     k(19)=.6;
     k(3)=.065*(T/300)^.435+5.670374419e-8*3.3e-3*(T)^3;
-    % s_density.*MW(s_index)*1000; 
+    % s_density = s_density.*MW(s_index)*1000; 
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
 	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29].*MW(s_index)*1000; 
-    % s_density = s_density1'.*MW(s_index)*1000;
     yi(18:end)=0;
-    % kb = rho_s_mass*sum(yi.*k./(s_density_new))/(1-phi);
     kb = rho_s_mass*sum(yi.*k./(s_density))/(1-phi);
     
 end
@@ -423,20 +413,19 @@ function e = epsilon(yi,rho_s_mass,phi)
     e = zeros(length(s_index),1)+0.757;
     e(3)=0.957; % char
     e(19)=.95; % H2O
-    % s_density.*MW(s_index)*1000;
+    % s_density = s_density.*MW(s_index)*1000;
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;5;1.67;...
-        55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29].*MW(s_index)*1000; 
+    55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29].*MW(s_index)*1000; 
     yi(18:end)=0;
-    % e = rho_s_mass*sum(yi.*e./(s_density_new))/(1-phi);
-     e = rho_s_mass*sum(yi.*e./(s_density))/(1-phi);
+    e = rho_s_mass*sum(yi.*e./(s_density))/(1-phi);
 end 
 
-% function defining heat capacity [J/kg/K]
+% function defining heat capacity [J/kgK]
 function cp = cp(T)
 global nsp
  
     cp = zeros(nsp,1)+(1.5+.001*T)*1000;
-    cp(15)= (.7+.0035*T)*1000; % char
+    cp(15) = (.7+.0035*T)*1000; % char
     cp(39) = 4188; % H2O
 
 end
@@ -446,7 +435,7 @@ end
 function q_srxns = q_srxns(T)
 
     global MW reactants % deltah % reactions
-    % deltah*4.184; % convert from kcal to kj
+    % deltah = deltah*4.184; % convert from kcal to kj
     deltah = [-1300; 27100; 23200; -62700; -5000; -500; -42400; 17900; 12000;...
 	-10300; 30700; 26000; -31100; -26100; 46200; -21100; -83600; 1300; 1300;...
 	10100; -29100; -13400; 48600; 0; 0; 0; 0; 0; 24608.12; -92808.17; -25041.145]*4.184;
@@ -458,10 +447,9 @@ end
 function phi = phii(yi,rho_s_mass)
     
     global MW s_index % s_density % s_density_new
-    % s_density*1000;
+    % s_density = s_density*1000;
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
 	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29]*1000;
     yi(18:end)=0;
     phi = 1-sum(yi./(s_density.*(MW(s_index))))*rho_s_mass;
-    % phi = 1-sum(yi./(s_density_new)')*rho_s_mass;
 end
