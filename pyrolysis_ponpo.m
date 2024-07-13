@@ -69,7 +69,6 @@ y20 = [rhogphi0(:); rgpy0(:)]; % initial solution vector y2
 % input radiative heat flux (W/m2)
 qs = 40000; 
 
-
 %% variable initialization %%
 
 dt =.1; % time step size
@@ -114,7 +113,17 @@ for i=1:nstep
     t(i+1) = t(i) + dt;
 end
 
-global ycoeff afac nfac ea istart qs g_index s_index  MW gsp nsp p0 yj0 tempflux
+% tracking stuff 
+
+dim_rho_py = 
+mass = zeros(nstep, nsp); % track mass of ea species
+for i=1:nstep
+        mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
+end
+
+save 'pyrolysis_60nodes_40k.mat' Ts mass dim_rho_py 
+
+% global ycoeff afac nfac ea istart qs g_index s_index  MW gsp nsp p0 yj0 tempflux
 
 %% define functions %%
 
