@@ -23,7 +23,7 @@ load('solid_kinetics_data_v3.mat');
 
 % mesh set-up
 
-Mesh.Jnodes = 10; % number of cells
+Mesh.Jnodes = 60; % number of cells
 sample_height = 3.8e-2; % <- white pine, 3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2;
@@ -192,7 +192,13 @@ end
 
 dimrho_ox = yy1(:,end)/yy1(1,end);
 
-% save ox_dataatfol_60k.mat yy Ts yy1 dimrho_ox ye j0
+% track mass along heated surface (top cell)
+mass = zeros(nstep, nsp);
+for i=1:nstep
+        mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
+end
+
+save ox_data_whitepine_40k.mat yy Ts yy1 dimrho_ox ye j0
  
 toc; % end timer
 
@@ -255,7 +261,7 @@ global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux re
         e(i) = epsilon(yi(:,i),rhos(i),phi(i));
         M = 1/sum(yj(:,i)./MW(g_index)); 
         p(i) = rhogphi(i)/phi(i)*R*abs(T(i))/M-p0;
-        D3(i) = .018829*sqrt(T(i)^3*(1/32+1/28))/((p(i)+p0)*5.061^2*.93);
+        D3(i) = .018829*sqrt(abs(T(i)^3*(1/32+1/28))/((p(i)+p0)*5.061^2*.93));
 
     end 
     
