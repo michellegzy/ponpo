@@ -18,7 +18,10 @@
 global gsp nsp s_index p0 yj0 MW g_index qs tempflux R 
 
 % load reaction rates parameters 
-load('solid_kinetics_data.mat');
+load('solid_kinetics_data_v1.mat');
+
+nsp = length(species);
+gsp = length(g_index);
 
 % mesh set-up
 Mesh.Jnodes = 60; % number of cells
@@ -60,6 +63,8 @@ p0 = 1.013e5; % initial pressure (Pa)
 yj0 = zeros(gsp,1);  % initial gas mass fraction
 yj0(end) = 1;  % gas environment, only N2 present
 M = 1/sum(yj0./MW(g_index)); % average MW
+% MWt = MW';
+% M = 1/sum(yj0./MWt(g_index)); % average MW
 R = 8.314; % gas constant
 rhog0 = zeros(Mesh.Jnodes,1) + (p0)*M/(R*T0(1)); % initial gas density (kg/m3)
 rhogphi0 = rhog0*phii(yi0,rhos0(1)); % gas_rho*g*phi
@@ -115,22 +120,23 @@ end
 
 % tracking stuff 
 
-dim_rho_py = 
+dim_rho_py = yy1(:,end)/yy1(1,end);
+
 mass = zeros(nstep, nsp); % track mass of ea species
 for i=1:nstep
         mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
 end
 
-save 'pyrolysis_60nodes_40k.mat' Ts mass dim_rho_py 
+save 'pyrolysis_60nodes_40k.mat' Ts mass dim_rho_py yy1 yy 
 
-% global ycoeff afac nfac ea istart qs g_index s_index  MW gsp nsp p0 yj0 tempflux
+% global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp p0 yj0 tempflux
 
 %% define functions %%
 
 % ODE function y2' (species transport)
 function [dydt] = yprime(t,yy,Mesh,yy1)
 
-global ycoeff afac nfac ea istart s_index g_index MW gsp nsp p0 yj0 tempflux
+global ycoeff afac nfac ea istart s_index g_index MW gsp nsp p0 yj0 tempflux R
 
     wdot_mass = zeros(nsp,Mesh.Jnodes); % species mass production rate
     k = zeros(28,Mesh.Jnodes); % reaction rate coefficient
@@ -248,7 +254,7 @@ end
 % ODE function y1' (energy transport) 
 function [dydt] = yprime1(t,yy,Mesh)
 
-global ycoeff afac nfac ea istart s_index g_index qs MW deltah gsp nsp tempflux p0
+global ycoeff afac nfac ea istart s_index g_index qs MW deltah gsp nsp tempflux p0 R
 
     wdot_mass = zeros(nsp,Mesh.Jnodes);
     k = zeros(28,Mesh.Jnodes);
