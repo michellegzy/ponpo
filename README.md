@@ -9,4 +9,4 @@ the TGA(2) simulation has been modified and iteratively solves the continuity eq
 
 the sugar_tga file has been simplified as a initial step in adding the surrogate kinetic scheme to the pyrolysis solver. (MG)
 
-to run this file, a file containing stored variables ('ranzi_pyro_kinetics_gentile2017.mat') is needed.
+to run these files, files containing stored variables are needed. currently, pyrolysis_ponpo.m requires 'solid_kinetics_data_v1.mat,' while the tga models (.m) require 'ranzi_pyro_kinetics_gentile2017.mat.' 'ranzi_pyro_kinetics_gentile2017.mat' is outdated and may be phased out eventually.
