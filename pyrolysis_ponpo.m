@@ -63,9 +63,7 @@ p0 = 1.013e5; % initial pressure (Pa)
 yj0 = zeros(gsp,1);  % initial gas mass fraction
 yj0(end) = 1;  % gas environment, only N2 present
 M = 1/sum(yj0./MW(g_index)); % average MW
-% MWt = MW';
-% M = 1/sum(yj0./MWt(g_index)); % average MW
-R = 8.314; % gas constant
+R = 8.314; % gas constant (J/molK)
 rhog0 = zeros(Mesh.Jnodes,1) + (p0)*M/(R*T0(1)); % initial gas density (kg/m3)
 rhogphi0 = rhog0*phii(yi0,rhos0(1)); % gas_rho*g*phi
 rgpy0 = zeros(gsp,Mesh.Jnodes) + rhogphi0(1).*yj0; % gas_rho*g*phi*y_gas_species
@@ -76,7 +74,7 @@ qs = 40000;
 
 %% variable initialization %%
 
-dt =.1; % time step size
+dt = .1; % time step size
 nstep = 2000; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
