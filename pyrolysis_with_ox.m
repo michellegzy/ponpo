@@ -1,4 +1,4 @@
-%% 1D pyrolysis model %%
+%% 1D pyrolysis model with char oxidation %%
 
 % solves the two ODE system with the functions: 
 % y1' = f1(t,y1)    -- equations 1 & 2 in methods
@@ -22,7 +22,7 @@ load('solid_kinetics_data_v3.mat');
 
 %% mesh set-up %%
 
-Mesh.Jnodes = 3; % number of cells
+Mesh.Jnodes = 60; % number of cells
 sample_height = 3.8e-2; % <- white pine, 3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2; % cross-sectional area of each cell
@@ -193,7 +193,7 @@ for i=1:nstep
         mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
 end
 
-save ox_data_whitepine_40k_713.mat yy Ts yy1 dimrho_ox ye j0
+save ox_data_whitepine_40k_713.mat yy Ts yy1 dimrho_ox ye j0 mass 
  
 toc; % end timer
 
@@ -346,7 +346,7 @@ global afac nfac ea reactants s_index g_index qs MW deltah nsp reactions reactio
     rho_s_mass(:) = yy((nsp+1)*Mesh.Jnodes+1:(nsp+2)*Mesh.Jnodes);
     
     sigma = 5.670374419e-8; 
-	h = 10; % heat transfer coefficient at top boundary [w/mk]
+	h = 10; % heat transfer coefficient at top boundary [w/mK]
 	tr = 0;
     
     for i=1:Mesh.Jnodes
@@ -411,8 +411,11 @@ end
 function e = epsilon(yi,rho_s_mass,phi)
     global s_index MW % s_density % s_density_new
     e = zeros(length(s_index),1)+0.757;
-    e(3)=0.957; % char
-    e(19)=.95; % H2O
+    % e(3)=0.957; % char
+    % e(19)=.95; % H2O
+    e(3)  = 0.957; % char
+    e(17) = 0.95; % acqua
+    e(25) = 0.60; % ash
     % s_density = s_density.*MW(s_index)*1000;
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;5;1.67;...
     55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058;45.29].*MW(s_index)*1000; 
