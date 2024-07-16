@@ -17,6 +17,8 @@
 
 global gsp nsp s_index p0 yj0 MW g_index qs tempflux R 
 
+tic; % start timer 
+
 % load reaction rates parameters 
 load('solid_kinetics_data_v1.mat');
 
@@ -24,8 +26,8 @@ nsp = length(species);
 gsp = length(g_index);
 
 % mesh set-up
-Mesh.Jnodes = 60; % number of cells
-sample_height = 3.8e-2; % (m)
+Mesh.Jnodes = 5; % number of cells
+sample_height = 2e-3; % 3.8e-2; % (m)
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2; % cross-sectional area of each cell, (m2)
 Mesh.dv = Mesh.a * Mesh.dz;
@@ -75,7 +77,7 @@ qs = 40000;
 %% variable initialization %%
 
 dt = .1; % time step size
-nstep = 2000; % number of time steps
+nstep = 1000; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -118,16 +120,18 @@ end
 
 % tracking stuff 
 
-dim_rho_py = yy1(:,end)/yy1(1,end);
+% dim_rho_py = yy1(:,end)/yy1(1,end);
 
 mass = zeros(nstep, nsp); % track mass of ea species
 for i=1:nstep
         mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
 end
 
-save 'pyrolysis_60nodes_40k.mat' Ts mass dim_rho_py yy1 yy 
+save 'pyrolysis_5nodes_2mm.mat' Ts mass yy1 yy 
 
 % global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp p0 yj0 tempflux
+
+toc; % end timer
 
 %% define functions %%
 
