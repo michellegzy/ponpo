@@ -22,7 +22,7 @@ load('solid_kinetics_data_v3.mat');
 
 %% mesh set-up %%
 
-Mesh.Jnodes = 60; % number of cells
+Mesh.Jnodes = 5; % number of cells
 sample_height = 3.8e-2; % <- white pine, 3.891e-3; % <- ma 1hr, % [m], 0.372273e-3; % <- AT fol, 0.399166667e-3; % <- Cvfol, 0.2892e-3; % <- ma fol, 2.244e-3; % <- CV 1hr, 2.360e-3; % <- AT 1hr, 
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2; % cross-sectional area of each cell
@@ -36,7 +36,7 @@ Mesh.dv = Mesh.a * Mesh.dz;
 % 's_index' stores the indices of solid-phase species
 % MW stores moecular weight of species (Kg/mol)
 
-global qs g_index s_index s_density MW gsp nsp p0 yj0 tempflux R reactants reactions afac nfac ea reaction_order % deltah 
+global qs g_index s_index s_density MW gsp nsp p0 yj0 tempflux R reactants reactions afac nfac ea reaction_order reactants0 % deltah 
 
 nsp = length(species);
 gsp = length(g_index);
@@ -144,7 +144,7 @@ qs = 40000;
 %% variable initialization  %%
 
 dt = .1; % time step size
-nstep = 2000; % number of time steps
+nstep = 1000; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -160,6 +160,7 @@ yy1(1,:) = y10;
 
 ye = zeros(length(t),length(g_index)); % mass fraction of gaseous species at top surface
 j0 = zeros(length(t),1); % mass flux of gaseous products at top surface
+mass = zeros(nstep, nsp); % mass of all species along heated surface (top cell)
 Ts = zeros(length(t),1); % temperature at top surface
 Ts(1) = T_initial;
 
@@ -175,7 +176,9 @@ for i=1:nstep
 	% this step ensures the mass fraction values are non-negative
     temp = a(end,:);
     temp(temp<0)=1e-30;
-	
+
+    mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
+
 	j0(i+1) = tempflux;
     ye(i+1,:) = temp(:,end-gsp+1:end)./sum(temp(:,end-gsp+1:end),2);    
    	
@@ -185,15 +188,15 @@ for i=1:nstep
     t(i+1) = t(i) + dt;
 end
 
-dimrho_ox = yy1(:,end)/yy1(1,end);
+% dimrho_ox = yy1(:,end)/yy1(1,end);
 
 % track mass along heated surface (top cell)
-mass = zeros(nstep, nsp);
-for i=1:nstep
-        mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
-end
+% mass = zeros(nstep, nsp);
+% for i=1:nstep
+%         mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
+% end
 
-save ox_data_whitepine_40k_713.mat yy Ts yy1 dimrho_ox ye j0 mass 
+% save ox_data_whitepine_40k_713.mat yy Ts yy1 dimrho_ox ye j0 mass 
  
 toc; % end timer
 
@@ -203,7 +206,7 @@ toc; % end timer
 
 function [dydt] = yprime(t,yy,Mesh,yy1)
 
-global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux reactions reactants R 
+global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux reactions reactants0 R 
 
     wdot_mass = zeros(nsp,Mesh.Jnodes); % species mass production rate
     k = zeros(length(afac),Mesh.Jnodes); % reaction rate coefficient
@@ -245,13 +248,20 @@ global afac nfac ea reaction_order s_index g_index MW gsp nsp p0 yj0 tempflux re
 		% afac: Z_A parameter in eqn 9 in methods
 		% nfac: n parameter in eqn 9 in methods
 		% ea: E_A parameter in eqn 9 in methods
-		% reactions: index of the reacting species for each reaction
+		% reactants: index of the reacting species for each reaction
 		
         yi(:,i) = m(s_index,i).*MW(s_index)./sum(m(s_index,i).*MW(s_index));
         phi(i) = phii(yi(:,i),rhos(i));
         k(:,i) = afac .*((T(i)).^nfac).* exp(-ea ./(R*T(i)));
-        dum = m(:,i);
-        mprime(:,i) = reactions*(k(:,i).*prod((dum(reactants).^reaction_order),2)).*MW; 
+        react_row = reactants0(i,:);
+        if react_row(:,2)~=0
+            for i=1:2
+                dum = m(:,i);
+                mprime(:,i) = reactions*(k(:,i).*prod((dum(reactants0).^reaction_order),2)).*MW; 
+            end
+        else 
+            mprime(:,i) = reactions*(k(:,i).*m(reactants0,i)).*MW; 
+        end
         wdot_mass(:,i) = mprime(:,i)./ Mesh.dv;
         kb(i)= kba(T(i),yi(:,i), phi(i),rhos(i)); 
         e(i) = epsilon(yi(:,i),rhos(i),phi(i));

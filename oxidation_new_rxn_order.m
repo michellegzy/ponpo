@@ -20,18 +20,17 @@ tic;
 global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp p0 yj0 tempflux exponents
 
 % load reaction rates parameters 
-%load ('solid_kinetics_data.mat');
-ycoeff = readmatrix('ycoeff.csv');
-nfac = readmatrix('nfac.csv');
-afac = readmatrix('afac.csv');
-g_index = readmatrix('g_index.csv');
-s_index = readmatrix('s_index.csv');
-% exponents = readmatrix('exponents.csv');
-ea = readmatrix('ea.csv');
-MW = readmatrix('MW.csv');
-istart = readmatrix('istart.csv');
-species = readcell('species.csv');
-
+load('solid_kinetics_data_v2.mat');
+% ycoeff = readmatrix('ycoeff.csv');
+% nfac = readmatrix('nfac.csv');
+% afac = readmatrix('afac.csv');
+% g_index = readmatrix('g_index.csv');
+% s_index = readmatrix('s_index.csv');
+% % exponents = readmatrix('exponents.csv');
+% ea = readmatrix('ea.csv');
+% MW = readmatrix('MW.csv');
+% istart = readmatrix('istart.csv');
+% species = readcell('species.csv');
 
 % mesh set-up
 
@@ -126,13 +125,13 @@ for i=1:nstep
     [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options); % equation 2
 	
 	% this step ensures the mass fration values are non-negative
-    % temp = a(end,:);
-    % temp(temp<0)=1e-30;
-    % 
-	% j0(i+1) = tempflux;
-    % ye(i+1,:) = temp(:,end-gsp+1:end)./sum(temp(:,end-gsp+1:end),2);    
-    % 
-    % yy(i+1,:) = temp;
+    temp = a(end,:);
+    temp(temp<0)=1e-30;
+
+	j0(i+1) = tempflux;
+    ye(i+1,:) = temp(:,end-gsp+1:end)./sum(temp(:,end-gsp+1:end),2);    
+
+    yy(i+1,:) = temp;
     yy1(i+1,:) = b(end,:);
     Ts(i+1) = yy1(i+1,nsp*Mesh.Jnodes+Mesh.Jnodes);
     mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
@@ -359,7 +358,7 @@ global ycoeff afac nfac ea istart s_index g_index qs MW deltah nsp exponents
         
         r1 = A1*exp(-Ea1/R/T(i))*m(15,i)*m(13,i)/Mesh.dv/phi(i);
         r4 = A4*exp(-Ea4/R/T(i))*m(15,i)*m(48,i)/Mesh.dv/phi(i); 
-        r5 = A5*exp(-Ea5/R/T(i))*m(15,i)*(m(48,i)/Mesh.dv/phi(i))^.78; %[mol/s]
+        r5 = A5*exp(-Ea5/R/T(i))*m(15,i)*(m(48,i)/Mesh.dv/phi(i))^.78; % [mol/s]
 
         mprime(15,i) = (-r5-r4-r1)*MW(15);
         mprime(48,i) = (-r5*.5-r4)*MW(48);
@@ -431,8 +430,11 @@ end
 function e = epsilon(yi,rho_s_mass,phi)
     global s_index MW
     e = zeros(length(s_index),1)+0.757;
-    e(3)=0.957; % char
-    e(19)=.95; %H2O
+    % e(3)=0.957; % char
+    % e(19)=.95; %H2O
+    e(3)  = 0.957; % char
+    e(17) = 0.95; % acqua
+    % e(25) = 0.60; % ash
 
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;5;1.67;...
         55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index)*1000; 
