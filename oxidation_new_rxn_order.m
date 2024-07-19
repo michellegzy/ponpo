@@ -212,7 +212,7 @@ global ycoeff afac nfac ea istart s_index g_index MW gsp nsp p0 yj0 tempflux exp
         r4 = A4*exp(-Ea4/R/T(i))*m(15,i)*m(48,i)/Mesh.dv/phi(i); 
         r5 = A5*exp(-Ea5/R/T(i))*m(15,i)*(m(48,i)/Mesh.dv/phi(i))^.78; %[mol/s]
 
-        mprime(15,i) = (-r5-r4-r1)*MW(15);
+        mprime(15,i) = (-r5-r4-0.5*r1)*MW(15);
         mprime(48,i) = (-r5*.5-r4)*MW(48);
         mprime(10,i) = (r5)*MW(10);
         % mprime(11,i) = (r4)*MW(10);
