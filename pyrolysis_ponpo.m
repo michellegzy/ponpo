@@ -27,7 +27,7 @@ gsp = length(g_index);
 
 % mesh set-up
 Mesh.Jnodes = 5; % number of cells
-sample_height = 2e-3; % 3.8e-2; % (m)
+sample_height = 2e-2; % 3.8e-2; % (m)
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2; % cross-sectional area of each cell, (m2)
 Mesh.dv = Mesh.a * Mesh.dz;
@@ -93,6 +93,7 @@ yy1(1,:) = y10;
 
 ye = zeros(length(t),length(g_index)); % mass fraction of gaseous species at top surface
 j0 = zeros(length(t),1); % mass flux of gaseous products at top surface
+mass = zeros(nstep, nsp); % track mass of ea species
 Ts = zeros(length(t),1); % temperature at top surface
 Ts(1) = T_initial;
 
@@ -108,6 +109,9 @@ for i=1:nstep
 	% this step ensures the mass fration values are non-negative
     temp = a(end,:);
     temp(temp<0)=1e-30;
+
+    mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
+
 	
 	j0(i+1) = tempflux;
     ye(i+1,:) = temp(:,end-gsp+1:end)./sum(temp(:,end-gsp+1:end),2);    
@@ -122,12 +126,7 @@ end
 
 % dim_rho_py = yy1(:,end)/yy1(1,end);
 
-mass = zeros(nstep, nsp); % track mass of ea species
-for i=1:nstep
-        mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
-end
-
-save 'pyrolysis_5nodes_2mm.mat' Ts mass yy1 yy 
+% save 'pyrolysis_5nodes_2mm.mat' Ts mass yy1 yy 
 
 % global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp p0 yj0 tempflux
 
