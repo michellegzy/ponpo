@@ -415,7 +415,8 @@ global ycoeff afac nfac ea istart s_index g_index qs MW deltah nsp gsp char_ox_t
     d1 = cp(T(1));
 	%char oxidation
        if T(j) > char_ox_temp
-           deltah_char = (393.5e3/.012 + 110.5e3/.012); %J/kg char
+           % deltah_char = (393.5e3/.012 + 110.5e3/.012); %J/kg char
+           deltah_char = -32.8e6; % J/kg C
        end
     Tprime(1)=(Mesh.a*kb(1)/(Mesh.dz)*(T(2)-T(1))+Mesh.a*e(1)*tr/Mesh.Jnodes*qs...
         +Mesh.dv*sum(abs(wdot_mass(istart(:,1),1)).*q_srxns(T(1)))+ ...
