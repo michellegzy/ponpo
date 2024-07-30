@@ -29,11 +29,10 @@ load ('solid_kinetics_data_v2.mat');
 % istart = readmatrix('istart.csv');
 % species = readcell('species.csv');
 
-
 % mesh set-up
 
 Mesh.Jnodes = 5; % number of cells
-sample_height = 2e-2;
+sample_height = 2e-2; % (m)
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (2e-2)^2; % cross-sectional area of each cell 
 Mesh.dv = Mesh.a * Mesh.dz;
@@ -44,26 +43,28 @@ Mesh.dv = Mesh.a * Mesh.dz;
 % 'gsp' is number of gas-phase species
 % 'g_index' stores the indices of gas-phase species
 % 's_index' stores the indices of solid-phase species
-% MW stores moecular weight of species (Kg/mol)
+% MW stores moecular weight of species (kg/mol)
 
 global reactions afac nfac ea reactants qs g_index s_index MW gsp nsp p0 yj0 tempflux char_ox_temp yi0 
+
+MW = MW * 1e-3;
 
 nsp = length(species);
 gsp = length(g_index);
 
 % conversions = zeros(30,3);
-T0 = zeros(Mesh.Jnodes,1) + 300;  %temperature (K)
+T0 = zeros(Mesh.Jnodes,1) + 300;  % temperature (K)
 mass0 = zeros(nsp,Mesh.Jnodes); % mass of species
 
-%white pine
-mass0(1,:) = 0.4254; % CELL
+% white pine
+mass0(1,:)  = 0.4254; % CELL
 mass0(17,:) = 0.1927; % HCE
 mass0(24,:) = 0.0998; % LIGH
 mass0(25,:) = 0.0482; % LIGO
 mass0(23,:) = 0.1658; % LIGC
 mass0(38,:) = 0.0326; %TGL
-mass0(37,:) = 0.0354; %CTANN
-mass0(39,:) = 0.05; %moisture
+mass0(37,:) = 0.0354; % TANN
+mass0(39,:) = 0.0500; % moisture
 
 
 rhos0 = zeros(Mesh.Jnodes,1) + 380*(1+mass0(39,1)); % initial solid density (Kg/m3)
@@ -97,7 +98,7 @@ qs = 40000;
 %%% variable initialization  %%%%%%%%%%%%%
 
 dt = .1; % time step size
-nstep = 1000; % number of time steps
+nstep = 2000; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -122,8 +123,8 @@ options = odeset('RelTol',1.e-4,'AbsTol',1e-5);
 
 for i=1:nstep
     tspan = [t(i) t(i)+dt];
-    [~,b] = ode113(@(t,y)yprime1(time,y,Mesh,yy(i,:)),tspan,yy1(i,:),options); % equation 1
-    [~,a] = ode113(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options); % equation 2
+    [~,b] = ode15s(@(t,y)yprime1(time,y,Mesh,yy(i,:)),tspan,yy1(i,:),options); % equation 1
+    [~,a] = ode15s(@(t,y)yprime(time,y,Mesh,yy1(i,:)),tspan,yy(i,:),options); % equation 2
 
 	% this step ensures the mass fration values are non-negative
     temp = a(end,:);
