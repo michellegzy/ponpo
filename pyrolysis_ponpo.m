@@ -21,13 +21,14 @@ tic; % start timer
 
 % load reaction rates parameters 
 load('solid_kinetics_data_v1.mat');
+%MW = MW * 1e-3;
 
 nsp = length(species);
 gsp = length(g_index);
 
 % mesh set-up
-Mesh.Jnodes = 5; % number of cells
-sample_height = 2e-2; % 3.8e-2; % (m)
+Mesh.Jnodes = 60; % number of cells
+sample_height = 3.8e-2; % 3.8e-2; % (m)
 Mesh.dz = sample_height/(Mesh.Jnodes); 
 Mesh.a = (sample_height)^2; % cross-sectional area of each cell, (m2)
 Mesh.dv = Mesh.a * Mesh.dz;
@@ -77,7 +78,7 @@ qs = 40000;
 %% variable initialization %%
 
 dt = .1; % time step size
-nstep = 1000; % number of time steps
+nstep = 2000; % number of time steps
 time = 0;
 t = zeros(nstep+1,1); 
 t(1)= 0;
@@ -111,8 +112,8 @@ for i=1:nstep
     temp(temp<0)=1e-30;
 
     mass(i,:)=yy1(i, nsp*(Mesh.Jnodes-1)+1:nsp*(Mesh.Jnodes-1)+nsp);
-
-	
+    rgpy = reshape(yy(i,Mesh.Jnodes+1:end),gsp,Mesh.Jnodes);
+    mass(i,g_index)=transpose(rgpy(:,Mesh.Jnodes))*Mesh.dv;
 	j0(i+1) = tempflux;
     ye(i+1,:) = temp(:,end-gsp+1:end)./sum(temp(:,end-gsp+1:end),2);    
    	
@@ -126,7 +127,7 @@ end
 
 % dim_rho_py = yy1(:,end)/yy1(1,end);
 
-% save 'pyrolysis_5nodes_2mm.mat' Ts mass yy1 yy 
+% save 'pyrolysis_5nodes_2mm.mat' Ts mass yy1 yy ye j0
 
 % global ycoeff afac nfac ea istart qs g_index s_index MW gsp nsp p0 yj0 tempflux
 
@@ -334,7 +335,7 @@ function kb = kba(T,yi,phi,rho_s_mass)
     k(3)=.065*(T/300)^.435+5.670374419e-8*3.3e-3*(T)^3;
    
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
-	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index)*1000; 
+	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index);%*1000; 
     yi(18:end)=0;
     kb = rho_s_mass*sum(yi.*k./(s_density))/(1-phi);
     
@@ -349,7 +350,7 @@ function e = epsilon(yi,rho_s_mass,phi)
     e(19)=.95; % H2O
 
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;5;1.67;...
-        55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index)*1000; 
+        55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058].*MW(s_index);%*1000; 
     yi(18:end)=0;
     e = rho_s_mass*sum(yi.*e./(s_density))/(1-phi);
 end 
@@ -385,7 +386,7 @@ function phi = phii(yi,rho_s_mass)
     global MW s_index
     
     s_density = [9.37;9.37;25;11.5;11.5;11.5;5.88;3.48;3.59;5.88;4;7.29;5.76;7.22;...
-	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058]*1000;
+	5;1.67;55;0.0037;0.0058;0.0054;0.0807;0.01014;0.0051;0.0058];%*1000;
     yi(18:end)=0;
     phi = 1-sum(yi./(s_density.*MW(s_index)))*rho_s_mass;
 end
