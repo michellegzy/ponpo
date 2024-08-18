@@ -1,0 +1,35 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Pyrolysis sub model with oxidation
+message: >-
+  solver for pyrolysis and gasfication in an oxidative
+  environment. 
+type: software
+authors:
+  - given-names: Michelle
+    family-names: Gee
+    email: michellegeeprofessional@gmail.com
+    affiliation: Oregon State University
+    orcid: 'https://orcid.org/0000-0002-2035-3650'
+  - given-names: Diba
+    family-names: Behnoudfar
+repository-code: 'https://github.com/michellegzy/ponpo/tree/char-ox'
+repository-artifact: 'https://github.com/michellegzy/ignm2'
+abstract: >-
+  update to the pyrolysis submodel in repository ignm2. adds
+  char oxidation for gasification in an oxidative
+  environment. developed for live and forest fuels in a
+  combustive environment. 
+keywords:
+  - live fuel
+  - char oxidation
+  - pyrolysis
+  - fire
+  - numerical model
+  - combustion
+  - wildland fire
+  - wildfire
+version: '2.0'
+date-released: '2024-08-18'
